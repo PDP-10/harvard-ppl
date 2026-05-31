@@ -26,6 +26,27 @@ According to Thomas Standish,
 > to 1983 as the principal educational language for undergraduate
 > education at Harvard.
 
+According to Ed Taft,
+
+> The language was designed by Tim Standish, based on work that he had
+> done prior to becoming a professor at Harvard.  He recruited me to
+> write the PDP-10 implementation, which I did under his guidance.  I
+> worked on it sporadically during the school year and more
+> intensively as a summer job working for Tim.  He and I jointly wrote
+> the PPL User's Manual.  I eventually wrote a senior thesis, "Design
+> and Implementation of PPL".
+> 
+> At Harvard, PPL was used as the programming language for an
+> introductory programming class, NatSci 110, which was taught for
+> many years.  Initially, students ran their PPL programs on a
+> commercial PDP-10 time-sharing service.  Just before I graduated, a
+> project was started to re-implement PPL for the PDP-11.  Harvard had
+> a PDP-11 that had many terminals and was more readily accessible to
+> undergraduates.  As I recall, the changes to the language were
+> minor, but there were major improvements in the implementation.  One
+> of the key players was Alfred Spector, who now works for Google; I
+> don't remember the other participants.
+
 According to languages.info from TECO EMACS,
 
 > A language developed at Harvard for research in extensible
