@@ -3,6 +3,15 @@
 These files comes from the \[PPL,MWK] directory on the Stanford AI Lab
 PDP-10.
 
+MWK is Mark Kahrs, and here is his recollection on why he made a copy
+and why the files seem tailored for TENEX:
+
+> I read the manual from Harvard and thought it looked very cool.  So,
+> when I had a chance, I grabbed the files.  I am guessing that I
+> grabbed them from PARC since Ed Taft was part of the PPL project at
+> Harvard with Tom Cheatham.  And given that MAXC ran a version of
+> TENEX, it all makes sense.
+
 According to Thomas Standish,
 
 > PPL was written on a DEC PDP-10 at Harvard (1969-1971) by Standish
