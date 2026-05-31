@@ -1,0 +1,36 @@
+. << index for PPL manual >>
+.
+.nchap(Index)
+
+2Note:*  Upper-case entries refer to PPL identifiers
+such as function names and data types.
+
+.begin  << area declaration for first page >>
+.area text lines topline+line+1 to !bottom-1 chars !lmarg to !rmarg
+.  in 2 columns 4 apart
+.place text
+.
+.begin  << area declaration for subsequent pages >>
+.area text lines !top+4 to !bottom chars !lmarg to !rmarg
+.  in 2 columns 4 apart
+.
+.fill nojust
+.indent 0,5 tabs 4 preface 0
+.
+.wasl_wasr_wasp_null;
+.at "<" l "" r ">" pgno "%" 
+.  if ^wasl[1] neq ^"l"[1] then skip 1;
+.  if wasl neq "l" then start
+.    break }l{
+.    if "r" neq null then ", r" ;
+.    }# pgno{
+.  end else if wasr neq "r" then start
+.    break }\r# pgno{
+.  end else if wasp neq "pgno" then start
+.    }, pgno{
+.  end ;
+.  wasl_"l" ; wasr_"r" ; wasp_"pgno" ;
+. 
+.
+.receive "<>" ;
+.end ; end

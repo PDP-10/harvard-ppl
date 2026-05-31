@@ -1,0 +1,639 @@
+.chap(Useful Built-In Functions,builtin)
+
+Now that we have gained some proficiency in composing
+PPL statements and writing programs, there are a
+number of important operations we need to be able to
+perform in order to solve more complex problems using PPL.
+These include saving programs for later use, accessing
+programs previously stored away, printing formatted
+numbers, converting data from one type to another,
+computing mathematical functions, and many others.
+
+PPL contains a number of built-in functions for performing
+such operations.  We shall take up some of them here and
+defer the remainder until Sections {section! builtinuser} and {chapter! advanced}.  A complete summary
+of built-in functions, including the ones associated with
+unary and binary operators, is given in {"Appendix!" appbuiltin}.
+
+.sec(Saving and Restoring Programs,saving)
+
+PPL contains several mechanisms for %<saving/program>s
+.x restoring program
+.x program,restoring
+and data on !<files> for use in a subsequent
+.x file
+session.  Two of these are described here and the remainder
+in {"Section!" fileio}.  The system functions involved are ~<<SAVE>~,
+~<<RESTORE>~, ~<<READ>~, and ~<<WRITE>~.
+Each of these functions takes a single argument which
+is a ~&/<STRING/description of/file>~ describing the file
+to be read or written.
+
+Since different operating systems use different conventions
+for naming files, the most complete possible form of this file
+specification string varies depending on the operating system
+under which PPL is running.  Under the @/<DECsystem-10,filename format/in> (PDP-10)
+operating system, the form is:
+.see name,file,filename format
+.see device,filename format
+.see directory,filename format
+.see extension,file,filename format
+.see version,file,filename format
+.see subdirectory,filename format
+
+.begin nofill tabs 9
+
+\"!<dev>:!<name>.!<ext>[!<proj>,!<prog>]"
+.end
+
+where !<dev>: is the device name, !<name> is the filename (up to
+6 characters), .!<ext> is the extension (up to 3 characters),
+and [!<proj>,!<prog>] is the user project-programmer (account) number.
+
+Under the @/<Tenex,filename format/in> (PDP-10) operating system, the filename syntax
+is as follows:
+
+.begin nofill tabs 9
+
+\"!<dev>:<!<directory>>!<name>.!<extension>;!<version>"
+.end
+
+where !<dev>: is the device name, <!<directory>> is the name of the
+owner of the file, !<name> and .!<extension> are the arbitrary
+user-chosen filename and extension (up to 39 characters each),
+and ;!<version> is a version number of up to 6 digits.
+
+Finally, under the @/<Unix,filename format/in> (PDP-11) operating system,
+files are named as follows:
+
+.begin nofill tabs 9
+
+\"/!<directory>/!<subdirectory>/ ... /!<name>.!<extension><!<protection>>"
+
+.end
+
+where !<directory> and !<subdirectory> conform to Unix
+conventions for device and directory specification
+and !<name> and .!<extension> are as explained above.
+If the last character of a filename is a period, it
+is removed, allowing the user to specify files with no
+extensions.
+The <!<protection>> field is a three-digit octal number
+representing standard Unix precedence.
+
+In all cases, however, portions of the file specification not
+supplied by the user are defaulted to standard values.
+In particular, the default device is the disk, the default
+directory is your own (or your current connected or attached directory), and the default extension is ~.PPL~
+(for ~READ~ and ~WRITE~) or ~.ENV~ (for ~SAVE~ and ~RESTORE~).
+Hence, in most situations, users need supply only the !<name>
+portion of the specification. (If this is restricted to
+six or fewer letters and digits, then specifications
+of the form "!<name>" will be compatible across all operating
+systems under which PPL presently runs).
+
+{fn(SAVE,s)} and {fn(RESTORE,s)} are built-in functions for
+saving and restoring entire working environments.
+.x environment,saving and restoring
+.see saving environment,SAVE
+.see restoring environment,RESTORE
+The ~SAVE~ function writes out (onto the file described
+by the ~STRING~ !<s>) all functions, definitions,
+data, and control status in binary format (machine-readable
+only).  At some later time, the ~RESTORE~ function
+may be used to restore the same working environment.
+Indeed, if ~SAVE~ was given during the execution of
+some function, that function will resume automatically
+upon restoration of the environment.
+~RESTORE~ !<replaces> the current environment
+by the one read from the file;  that is, it is not
+possible to !<merge> environments by this means.
+
+The ~<<READ>~ and ~<<WRITE>~ system functions deal
+with 7<<ASCII>* (character) rather than binary
+information.  {fn(WRITE,s)} causes all currently-defined
+@@<function,writing onto file>s, @@<data definition,writing onto file>s, and @@<operator definition,writing onto file>s
+to be written out onto the file described by
+the ~STRING~ !<s>.
+(Data and operator definitions will be introduced in
+{"Chapter!" extension}).
+If !<s> is omitted, the output will be printed on
+the terminal.  Since the file is in character format,
+it may be read by systems other than PPL
+(e.g. Teco) or be listed by the monitor Type command.
+{fn(READ,s)} causes the data in the named file
+to be treated exactly as if it were teletype input.*<Due to
+an implementation deficiency, READ(s) should be given only as
+a direct command in PPL-10.>
+It is the user's responsibility to ensure that definitions
+in the current environment do not conflict with those
+in the file being read.  Usually, one wants to
+issue an ~@@<ERASE,issued before READ>()~ command
+(see {"Section!" erasing}) to clear the current environment
+before ~READ~ing a new program (though this is not
+always the case).
+If an error occurs during a ~READ~, the
+operation is terminated.  As usual, the statement
+that caused the error may be displayed by pressing
+the <<Escape> key.
+
+The ~WRITE~ and ~READ~ functions are to be
+preferred for long-term storage of programs, even though
+they save less information (i.e. they do not save
+the values of global or local variables, nor do they
+remember any control information).  This is for several
+reasons:
+
+(1) ~SAVE~d environments result in much larger files
+than those created by ~WRITE~.
+User file storage may be limited
+on some computer systems.
+
+(2) It is not possible to access the information in
+a ~SAVE~d file outside of PPL.
+
+(3) Whenever a new version of PPL is loaded onto the
+system, old environments are no longer restorable.
+.x environment file,invalidation of
+This is because a ~SAVE~d environment reflects
+much of the internal structure of PPL, which is likely
+to change from version to version.
+
+Thus, ~SAVE~ is really designed only
+for short-term storage, such as
+during debugging or when a long computation must be interrupted.
+~WRITE~ should be used for permanent or long-term storage.
+
+Functions for reading and writing files of data under program
+control are described in {"Section!" fileio}.
+
+.sec(Recording a Terminal Session,protocol)
+.x PROTOCOL
+.x UNPROTOCOL
+
+In many cases, such as when using a display terminal which
+does not produce hard-copy output, it is useful to be able to
+record a session with PPL that may later be printed out.
+In order to allow this operation, PPL includes a pair of
+functions ~PROTOCOL~ and ~UNPROTOCOL~ which causes a record
+of the entire terminal session to be written to the
+file ~PPL.PROTOCOL~.*<Currently, the ~PROTOCOL~ and ~UNPROTOCOL~
+funtions are defined in PPL-11 only.
+When these functions are implemented for the PDP-10, the filename
+will be changed to ~PROTO.PPL~ to conform to PDP-10 filename conventions.>
+The recording begins just after the ~PROTOCOL~ command is executed
+and consists of all user input and PPL responses until just after
+the execution of an ~UNPROTOCOL~ or ~SYS~ command.
+
+Following the conclusion of a particular PPL session, the protocol
+file may then be printed by commands to the operating system.
+In order to record more than one PPL session, it is necessary
+to rename the ~PPL.PROTOCOL~ file before beginning the second
+session to avoid overwriting the original protocol.
+
+.sec(Erasing Identifiers,erasing)
+.see identifier,erasing,ERASE
+.see function,erasing,ERASE
+.x ERASE
+
+Occasionally it is necessary to erase the values of
+variables or the definitions of functions.
+For example, we might want to erase the definition of
+~FACT~ so that we could define a new one.  To prevent
+unintentional user errors, PPL does not allow
+a function to be redefined until its old definition
+is explicitly deleted by the user.
+
+To erase a user-defined function, a call should be made
+to the built-in function ~ERASE~, giving as its argument
+the name of the function to be deleted !<preceded by
+a dollar sign>.  The reason for this latter requirement
+.x dollar sign,preceding argument to ERASE
+will be explained in {"Section!" moreerase}; failure to observe
+this precaution may lead to very unexpected results.
+For example, the ~FACT~ function is deleted
+by the command
+
+.examp
+\ERASE($FACT)
+.end
+
+
+~ERASE~ is an example of a !<variadic function>, i.e.
+.x variadic function
+.x function,variadic
+a function that may take a varying number of arguments.
+Thus, if ~ERASE~ is called with two or more arguments
+(separated by commas), the value or definition of each
+such identifier will be ~ERASE~d.  ~ERASE~ has
+a special operation if it is called with !<no> arguments;
+namely, the entire @@<environment,erasing> is cleared (just as if PPL
+had been started over, which is in fact what happens).
+To call ~ERASE~ with no arguments requires an empty
+set of @@<parentheses,required in variadic function call>.  This is the case for calling
+any variadic function with zero arguments.
+In this respect, variadic functions should be distinguished from
+functions that !<never> take arguments, such as
+~RESET~; in the latter case, the empty parentheses
+are not necessary.
+
+In the rare case in which it is necessary, it is also
+.see built-in function,erasing,ERASE
+legal to ~ERASE~ a built-in function.  For example,
+if a file created by ~WRITE~ contained a user-defined
+function whose name was later used as the name of a built-in
+function in a new version of PPL, it would no longer
+be possible to ~READ~ the old file because of the name
+conflict.  In this case, the user could first ~ERASE~
+the built-in function before attempting to ~READ~ the old file.
+
+.sec(More on Numbers,morenumbers)
+
+A more formal presentation of the text representation
+of @@<number,representation of>s will now be presented. In particular,
+it is necessary to become familiar with the
+lexical contexts within which numeric constants
+are recognized.
+
+In scanning from left to right in a statement,
+PPL will recognize a number (~@@<INT,numeric representation>~, ~@@<REAL,numeric representation>~, or
+~@@<DBL,numeric representation>~) when it sees one of the following character
+sequences:
+
+.begin indent 4,8 tabs 9
+a)\Any decimal digit which is not part of an identifier.
+This will be the first digit of an ~INT~, ~REAL~, or
+~DBL~.
+
+b)\A @@<period,introducing REAL or DBL> followed by a digit.  This indicates the beginning
+of a ~REAL~ or ~DBL~.
+
+c)\A @@<dollar sign,introducing octal number> ($) followed by a digit.  This indicates the
+start of an !<octal> (base 8) @<number,octal>, which is
+simply another lexical representation of an ~INT~.
+There may be one to twelve octal digits (0 through 7)
+following the '$'.  The digits 8 and 9 are not allowed.
+
+d)\A @@<percent sign,introducing relocatable line number> (%) followed by a digit.  This indicates the
+.x relocatable line number
+.x line number,relocatable
+start of a relocatable integer, which has the property
+of being changed whenever a line to which it refers
+is renumbered.  There may be one to three decimal
+digits after the percent sign.
+.end
+
+The arithmetic characteristics of numbers in
+PPL are as follows:
+
+An ~@@<INT,magnitude and precision>~ in @@<PPL-10,magnitude and precision in number> is capable of representing any
+.xx number,magnitude,of
+.x number,precision of
+.xx PPL-10,precision of number,in
+.xx PPL-11,precision of number,in
+integer number from -34359738368 to 34359738367.
+In @@<PPL-11,magnitude and precision in number>, the limits are -2147483648 to 2147483647.
+
+A ~@@<REAL,magnitude and precision>~ in PPL-10 can represent, to approximately eight significant
+digits' precision, a real number whose magnitude
+is either zero or between approximately 1.4695E-39 and 1.7014E+38.
+In PPL-11, the precision is only seven significant digits.
+
+A ~@@<DBL,magnitude and precision>~ can represent, to approximately
+sixteen digits of precision, any real number
+within the limits given for ~REAL~s.
+
+When @/<number,automatic printout/of>s are printed out by PPL,
+either by the 'implied print' feature (simply
+typing an expression on a line for evaluation)
+or by the ~PRINT~ system function,
+certain conventions are followed.
+They are as follows:
+
+An ~INT~, being inherently precise, is
+printed to its full precision (up to eleven digits)
+with leading zeroes suppressed.  No decimal
+point is printed.
+
+A ~REAL~ or ~DBL~ suffers from the problems
+of conversion to and from the computer's internal
+floating-point binary notation;
+thus, few decimal numbers can be represented
+'exactly'.  Though a ~REAL~ has
+nearly seven or eight digits of precision, and a ~DBL~ nearly sixteen,
+the last digit in either case is not particularly
+reliable.
+
+By convention, PPL rounds a ~REAL~ to seven
+.x rounding of REAL and DBL
+significant digits before printing, and a ~DBL~
+to fifteen.  It then suppresses leading and
+trailing zeroes.  A decimal point is always
+printed.  Scientific notation is used if
+.x scientific notation
+the magnitude of the number is outside
+the range 10{super(-3)} to 10{super(6)}.
+
+A built-in function, called ~<<FORMAT>~,
+.xx numeric output,alignment,of
+.see number,formatting,FORMAT
+is provided to allow user control over
+numeric output formatting.  This is necessary,
+for example, when attempting to format output
+into columns.  ~FORMAT~ takes any number of arguments,
+which it processes from left to right.
+
+If an argument is of type ~@@<STRING,as format specification>~,
+it is decoded and used as a !<format specification>
+for future output by ~FORMAT~.  This specification
+is composed of the following elements in the order given:
+
+.begin indent 4,16 tabs 17
+~E~ or ~D~\print in exponential format (with ~E~ or ~D~
+and a two-digit exponent).  If this part of the
+specification is omitted, standard (non-exponential)
+decimal format is assumed.
+
+!<n>Z\where !<n> is an integer less than 128, indicating
+the number of <<zero-suppress>ed digit positions
+to be allowed to the left of the decimal point.
+If this specification is omitted, zero is assumed.
+
+!<n>D\the number of non-zero-suppressed digit
+positions to the left of the decimal point.
+
+. (period)\indicates a decimal point is
+to be printed (otherwise it is omitted, and
+the next two specifications may not
+be included).
+
+!<n>D\the number of non-zero-suppressed digit
+positions to the right of the decimal point.
+
+!<n>Z\the number of zero-suppressed digit positions
+to the right of the decimal point.
+.end
+
+If the format specification is ~"FF"~ or ~"FF."~,
+it specifies printing in free format (including a period
+in the specification causes a decimal point always to be printed).
+Free format printing is the same as PPL's conventional
+printing format except that rounding is done to one greater
+digit of precision, i.e. 8 digits for a ~REAL~ and 16 for a ~DBL~.
+
+If the argument is of type ~INT~, ~REAL~, or ~DBL~,
+that number
+is printed according to the most recent
+format specification.  Blanks are substituted
+for leading and trailing zeroes if they are in
+zero-suppressed positions;  otherwise, the zeroes
+are printed out.  If the number is negative,
+the minus sign is printed in the last leading
+zero-suppressed position (if there is one).
+If the ~E~ or ~D~ specification has been
+included, the number is adjusted by powers of ten
+so as to exactly fill the leading
+non-zero-suppressed places.
+
+If the magnitude of a number is
+too large to fit in all the leading positions,
+an execution error occurs, with the
+message "Number will not fit into current format".
+
+The following examples illustrate some
+uses of ~FORMAT~.
+Note that like ~PRINT~, ~FORMAT~ does not output
+a carriage return after printing a number;
+this must be done explicitly by the user.
+
+.examp
+\FORMAT("3Z.4D", 7.41, 0.34168); ""
+  7.4100   .3417
+\FORMAT("3D.4Z", 7.41, 0.34168); ""
+007.41  000.3417
+\FORMAT("E1Z2D.4D", 7.41, 0.34168); ""
+ 74.1000E-01 34.1680E-02
+.end
+
+We can now use ~FORMAT~ to pretty up the
+printout of the multiplication table of
+{"Section!" forforms}:
+
+.examp
+\FORMAT("3Z1D")
+\FOR I_1:8 DO (FOR J_1:8 DO FORMAT(I*J)); ""
+   1   2   3   4   5   6   7   8
+   2   4   6   8  10  12  14  16
+   3   6   9  12  15  18  21  24
+   4   8  12  16  20  24  28  32
+   5  10  15  20  25  30  35  40
+   6  12  18  24  30  36  42  48
+   7  14  21  28  35  42  49  56
+   8  16  24  32  40  48  56  64
+.end
+The PDP-11 version of PPL also includes a function ~<<CURRENT.FORMAT>~
+which takes no arguments and returns the current ~FORMAT~ string.
+
+.sec(Conversion Functions,conversion)
+.x function,conversion
+
+PPL contains built-in functions for
+converting atomic data from one type to
+another.  These are as follows:
+
+.begin indent 0,8 tabs 9
+.xx INT,conversion function
+{fn(INT,a)}\The argument !<a> is converted and
+returned as an ~INT~, where !<a> may be any
+atomic value (~INT~, ~REAL~, ~DBL~, ~CHAR~, or ~BOOL~).
+If !<a> is a ~REAL~ or ~DBL~, the fractional
+part is truncated (removed).  If !<a> is a ~CHAR~,
+it is converted to its equivalent 7<<ASCII>*
+%<character/code>, which is a number in the range
+0 to 127 (see {"Appendix!" appascii}).  If !<a> is a ~BOOL~,
+the result is 1 if !<a> is ~TRUE~ and 0 if ~FALSE~.
+
+.xx REAL,conversion function
+{fn(REAL,a)}\The argument !<a> is converted
+to a ~REAL~ and returned.  Conventions
+for converting arguments of type ~BOOL~
+and ~CHAR~ are the same as for {fn(INT,a)}.
+
+.xx DBL,conversion function
+{fn(DBL,a)}\Same as {fn(REAL,a)} except the
+result is a ~DBL~.
+
+.xx BOOL,conversion function
+{fn(BOOL,a)}\Returns a ~BOOL~ean value
+as follows:  an ~INT~, ~REAL~, or ~DBL~ is
+converted to ~TRUE~ if nonzero and ~FALSE~
+if zero.  A ~CHAR~ is converted to ~TRUE~
+if and only if it is the character ~'T~
+(upper or lower case).
+
+.xx CHAR,conversion function
+{fn(CHAR,a)}\The argument !<a> is converted to
+a ~CHAR~acter as follows:  if the argument is
+of type ~INT~, ~REAL~, or ~DBL~, the value
+is used as a character code according to the
+table in {"Appendix!" appascii} (this value is reduced
+modulo 128 if it is outside the range zero through 127).
+If !<a> is a ~BOOL~, the character
+~'T~ is returned for ~TRUE~ and ~'F~ for ~FALSE~.
+.end
+
+The following are a few examples of the use of conversion functions:
+
+.examp
+\INT(137.45)
+137
+\REAL(-99)
+-99.
+\FOR I_65:90 DO PRINT(CHAR(I))
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+.end
+
+Additionally, there is a function {fn(IDIV,a,b)} which is the same as
+.see truncation,|IDIV, INT (function)|
+{fn(DIV,a,b)} (the function invoked by the built-in '/' operator)
+except that if both arguments are integers, the result is an
+integer as well (i.e. with the remainder from the division
+thrown away).  This makes {fn(IDIV,a,b)} approximately equivalent
+to 3INT(DIV(!<a>,!<b>))1 when !<a> and !<b> are both ~INT~s, but without the
+%<roundoff/error>s that might arise for large values of !<a> and !<b>.
+
+It is often convenient to be able to convert values of any type
+to the ~STRING~ which represents them, just as if the object were
+to be printed out.
+This provides the user with a powerful mechanism for writing his
+own formatting routines or for processing non-~STRING~ values in
+a character-oriented manner.
+The two PPL versions provide somewhat different mechanisms for
+this sort of operation.
+On the PDP-10, the functions ~<<PRINTSTR>~ and ~<<FORMATSTR>~ are
+defined, which operate in the same manner as ~PRINT~ and ~FORMAT~,
+except that the resulting ~STRING~ value is returned as the value of
+the function rather than being printed out.
+In PPL-11, a more restricted facility is provided by the function
+{fn(MSTRING,v)} which returns the ~STRING~ corresponding to the
+argument !<v>, which may be any numerical value (~INT~, ~REAL~ or ~DBL~).
+
+.sec(Mathematical Functions,mathfns)
+
+PPL contains a small set of useful %<mathematical/function>s.  All take numeric arguments
+(i.e. ~INT~, ~REAL~, or ~DBL~) and return
+results of type ~REAL~ or ~DBL~.  (In @@<PPL-10,INT and DBL argument to mathematical function>, an argument of type ~INT~ or ~DBL~
+is converted internally to a ~REAL~ during calculation;
+thus the extra precision of an ~INT~ or a ~DBL~ is not utilized).
+
+The %<trigonometric/function>s ~SIN~, ~COS~, and ~ATAN~
+deal with angles expressed in <<radian>s.  To convert radians
+to <<degree>s, multiply by 180/{pi}; to convert degrees
+to radians, multiply by {pi}/180 (the value of {pi}, to
+sixteen significant digits, is 3.141592653589793).
+
+.begin indent 0,8 tabs 9
+{fn(SIN,a)}\Sine of !<a>, where !<a> is an angle expressed
+in radians.  The result is in the range -1.0 to 1.0.
+
+.see cosine,COS
+{fn(COS,a)}\Cosine of !<a>, where !<a> is an angle expressed
+in radians.  The result is also in the range -1.0 to 1.0.
+
+.see arctangent,ATAN
+{fn(ATAN,a)}\Arctangent of !<a>, where !<a> is any ~REAL~ number.
+The result is the principal value of the arctangent expressed
+in radians, and is in the range -{pi}/2 to {pi}/2
+(approximately -1.570796 to 1.570796).
+.end
+
+Most other trigonometric functions may be defined
+in terms of the ones presented above; for example,
+we might define the cotangent function as follows:
+
+.examp
+\$<<COT>(X)
+   [1]\COT_COS(X)/SIN(X)
+   [2]\$
+
+\PI_3.141592653589793
+\COT(PI/4)
+1.
+.end
+
+The following are some other of PPL's built-in
+mathematical functions.  These will give execution
+errors if their arguments lie outside of certain
+specified ranges.
+
+.begin indent 0,8 tabs 9
+.see square root,SQRT
+{fn(SQRT,a)}\Square root of !<a>, which must be
+greater than or equal to zero.  The result is
+always greater than or equal
+to zero.
+
+.see logarithm,|LN, LOG|
+{fn(LN,a)}\Natural (base !<e>) logarithm of !<a>,
+which must be greater than zero.
+The value of !<e> is 2.71828182845.
+To get common (base 10) logarithms, multiply by
+~1/LN(10)~, which is approximately .4342944819.
+
+{fn(EXP,a)}\Exponential of !<a> (or !<e> to the !<a> power).
+!<a> must be between about -88 and 88; the result is
+always positive.  {fn(EXP,a)} is the inverse of {fn(LN,a)}.
+.end
+
+The following additional functions are included only in PPL-11.
+(In PPL-10, these may easily be defined as user functions
+in terms of existing built-in functions.)
+
+.begin indent 0,8 tabs 9
+.x PPL-11,ABS function
+{fn(ABS,a)}\The absolute value of !<a>.
+
+.x PPL-11,TAN function
+{fn(TAN,a)}\Tangent of !<a> (radians).
+
+.x PPL-11,LOG function
+{fn(LOG,a)}\Common (base 10) logarithm of !<a>.
+.end
+
+The last built-in function to be discussed here,
+called ~<<RANDOM>~, is used to generate !<pseudo-random>
+.see pseudo-random,RANDOM
+.see number,random,RANDOM
+numbers.  By pseudo-random, we mean that, although the
+numbers are generated by a deterministic, well-defined
+process in the computer, there is no way for the normal user
+or program to predict the next number in sequence;  further,
+these pseudo-random numbers have certain statistical
+properties with respect to uniform distribution and variance.
+This function operates as follows:
+
+.begin indent 0,12 tabs 13
+{fn(RANDOM,a)}\For any value of !<a>, returns a pseudo-random
+~REAL~ between zero and one (not inclusive).
+The argument !<a>, which must be of type ~INT~, ~REAL~, or ~DBL~,
+determines what (if any) initialization of the random number
+generator is to take place.
+.indent 12,12
+If !<a>=0, the next random number in the present
+sequence is generated; no initialization is performed.
+
+If !<a><0, the random number generator is initialized
+to an arbitrary quantity (actually a function of the
+time of day), and the first random number in that sequence
+is returned.
+
+If !<a>>0, the random number generator is initialized to the
+value !<a>, and the first random number in that sequence
+is returned.  Repeatable random number sequences may thus be generated
+by always initializing ~RANDOM~ to the same positive number.
+This is sometimes useful when
+controlled experiments are desired.
+.end
+
+When PPL is started up, an implicit call of 3RANDOM(-1)1
+is made to ensure a different starting value for each session.

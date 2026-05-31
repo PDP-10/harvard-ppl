@@ -1,0 +1,1164 @@
+. << appendices for PPL manual >>
+.
+.app(Built-In Functions and Operators,appbuiltin,yes)
+
+This table is intended only as a handy guide.  See {"Appendix!" apptype}
+for details on polymorphic type conversions.
+
+Some of the functions described here are implemented in only
+a particular version of PPL.  Such functions are indicated in
+this table by a subscript which indicates the appropriate version
+(for example, ~BACKTRACE~{sub(10)} indicates that the function
+is definded in PPL-10 only).
+
+.begin nofill tabs 10,15,21,35
+.x precedence,table
+
+!<Operator\Prec.\Assoc.\Name\Description>
+
+.fill indent 0,34 preface 0
+
+!<a>#+#!<b>\70\Left\{fn(ADD,a,b)}\Add !<b> to !<a>.
+
+!<a>#-#!<b>\70\Left\{fn(SUB,a,b)}\Subtract !<b> from !<a>.
+
+!<a>#*#!<b>\80\Left\{fn(MUL,a,b)}\Multiply !<a> by !<b>.
+
+!<a>#/#!<b>\80\Left\{fn(DIV,a,b)}\Divide !<a> by !<b>.
+
+!<a>#^#!<b>\90\Right\{fn(POWER,a,b)}\Raise !<a> to the !<b> power
+(!<b> must be an ~INT~eger in PPL-11).
+
+.once preface 1
+##+#!<a>\100\\{fn(PLUS,a)}\Unary plus (fairly useless, but
+included for symmetry).
+
+##-#!<a>\100\\{fn(MINUS,a)}\Return the negative of !<a> (~INT~, ~REAL~, or ~DBL~)
+or the logical complement of !<a> (~BOOL~).
+
+.once preface 1
+!<a>#<#!<b>\50\Left\{fn(LESS,a,b)}\Return ~TRUE~ if !<a> is less than !<b>,
+otherwise ~FALSE~.
+
+!<a>#<=#!<b>\50\Left\{fn(LESSEQ,a,b)}\!<a> less than or equal to !<b>.
+
+!<a>#>#!<b>\50\Left\{fn(GR,a,b)}\!<a> greater than !<b>.
+
+!<a>#>=#!<b>\50\Left\{fn(GREQ,a,b)}\!<a> greater than or equal to !<b>.
+
+!<a>#=#!<b>\50\Left\{fn(EQ,a,b)}\!<a> equal to !<b>.
+
+!<a>###!<b>\50\Left\{fn(NOTEQ,a,b)}\!<a> not equal to !<b>.
+
+!<a>#==#!<b>\60\Left\{fn(INSTANCE,a,b)}\~TRUE~ if the value !<a> is an instance of
+the predicate !<b>, otherwise ~FALSE~.
+
+.once preface 1
+!<a>#&#!<b>\40\Left\{fn(AND,a,b)}\~TRUE~ if !<a> and !<b> are both ~TRUE~, otherwise ~FALSE~.
+
+!<a>#!#!<b>\30\Left\{fn(OR,a,b)}\~TRUE~ if either !<a> or !<b> (or both) is ~TRUE~,
+otherwise ~FALSE~.
+
+.once preface 1
+!<a>#_#!<b>\20\Right\{fn(ASSIGN,a,b)}\Assign to !<a> a copy of the value of !<b>.
+
+!<a>#__#!<b>\20\Right\{fn(NONCOPY,a,b)}\Make !<a> share the value of !<b>.
+
+.once preface 1
+##-->#!<b>\10\\{fn(UGOTO,b)}\Unconditionally go to statement !<b>.
+This operation also invoked by the word ~GOTO~.
+
+!<a>#-->#!<b>\10\Left\{fn(CGOTO,a,b)}\If !<a> is ~TRUE~, go to statement !<b>.
+
+.next page
+.indent 0,23 tabs 24 preface 1
+.macro cat(str) 
+.if lines<6 then next page
+.skip 2
+4str*
+.break;
+.sectionname _ "str"
+. 
+
+
+.cat(Program Control Functions)
+
+~<<RESET>~\Resets control to global (top-level)
+environment, thereby eliminating all nests of function
+calls and suspended environments.  Usually required
+for text editing.
+
+~<<RESUME>~\Resumes execution from state of suspension.
+
+3<<STOP>(2f3,2n713,2n723,#...#)1\Sets stop codes in function !<f> at statements
+2n711, 2n721, etc.  If no statement numbers are supplied,
+all statements of !<f> are affected.
+
+3<<UNSTOP>(2f3,2n713,2n723,#...#)1\Removes stop codes; arguments processed as in ~STOP~.
+
+3<<TRACE>(2f3,2n713,2n723,#...#)1\Sets trace codes; arguments processed as in ~STOP~.
+
+3<<UNTRACE>(2f3,2n713,2n723,#...#)1\Removes trace codes; arguments processed as in ~STOP~.
+
+~<<BACKTRACE>~#{sub(10)}\Prints the name and current step number of all
+functions currently entered, starting with the most recent function.
+
+{fn(ERASE,a,b,#...#)}\Causes the meanings of identifiers
+!<a>, !<b>, etc. to be erased from the current environment.
+If ~ERASE~ is called with no arguments,
+the entire environment is erased.
+
+.cat(Type Conversion Functions)
+{fn(INT,a)}\Converts the value of !<a> to an ~INT~eger,
+where !<a> may be any atomic value (~INT~, ~REAL~, ~DBL~, ~BOOL~, ~CHAR~,
+or ~NULL~).  A ~BOOL~ is converted to
+1 if ~TRUE~ and 0 if ~FALSE~.  A ~CHAR~ is converted
+to its equivalent 7ASCII* character code
+(see {"Appendix!" appascii}).  ~NULL~ is always converted to zero.
+
+{fn(REAL,a)}\Converts the value of !<a> to a ~REAL~.
+Conventions for arguments are the same as for {fn(INT,a)}.
+
+{fn(DBL,a)}\Converts the value of !<a> to a ~DBL~.
+Conventions for arguments are the same as for {fn(INT,a)}.
+
+{fn(BOOL,a)}\Converts the value of !<a> to a ~BOOL~.
+An ~INT~, ~REAL~, or ~DBL~ is converted to ~TRUE~
+if nonzero and ~FALSE~ if zero.  A ~CHAR~ is converted
+to ~TRUE~ if it is ~'T~ or ~'t~, otherwise to ~FALSE~.
+~NULL~ is always converted to ~FALSE~.
+
+{fn(CHAR,a)}\Converts the value of !<a> to a ~CHAR~.
+If !<a> is numeric (~INT~, ~REAL~, or ~DBL~), it is
+truncated and used as a character code (see {"Appendix!" appascii}).
+A ~BOOL~ is converted to the character ~'T~ if it is
+~TRUE~ and ~'F~ if ~FALSE~.  ~NULL~ is converted
+to the null character (7ASCII* code 0).
+
+.cat(Input/Output Functions)
+
+{fn(PRINT,a,b,#...#)}\Prints every argument in turn, with
+no spaces or line advances between them.
+
+{fn(FORMAT,a,b,#...#)}\Performs formatted numeric output,
+using ~STRING~ arguments as format specifications
+and numeric arguments as values to be printed in the
+given format.
+
+{fn(PRINTSTR,a,b,#...#)}#{sub(10)}\Identical to ~PRINT~, except that the
+sequence of characters that would be printed is returned as a ~STRING~.
+
+{fn(FORMATSTR,a,b,#...#)}#{sub(10)}\Identical to ~FORMAT~, except that the
+sequence of characters that would be printed is returned as a ~STRING~.
+
+{fn(MSTRING,a)}#{sub(11)}\The ~STRING~ corresponding to the printed
+representation of !<a> is returned.  The argument may be an ~INT~,
+~REAL~ or ~DBL~.
+
+{fn(WRITE,s)}\Writes all function definitions,
+operator definitions, and data definitions onto the
+file described by the ~STRING~ !<s>.  If !<s> is omitted,
+the output appears on the user's terminal.
+
+{fn(READ,s)}\Reads statements from the file described
+by the ~STRING~ !<s>, as if they were coming from
+the terminal.  Files written with ~WRITE~ may
+be read with ~READ~.
+
+{fn(SAVE,s)}\Saves the current environment in the file
+described by the ~STRING~ !<s>.
+
+{fn(RESTORE,s)}\Restores the environment contained in the file
+described by the ~STRING~ !<s>.
+
+{fn(INPUT,c,s,m)}\Opens the file described by the ~STRING~
+!<s> on channel !<c> in mode !<m> for input (!<m>=~CHAR~ if omitted).
+
+{fn(OUTPUT,c,s,m)}\Opens the file described by the
+~STRING~ !<s> on channel !<c> in mode !<m> for output.
+
+{fn(INBYTE,c)}\Reads and returns a byte through channel !<c>.
+
+3<<OUTBYTE>(2c3,2b713,2b723,...,2b7n3)1\Writes bytes 2b711, 2b721, ...#2b7n1
+out through channel !<c>.
+
+{fn(INSTMT,c)}\Reads and executes a statement through channel !<c>
+and returns its value.
+
+{fn(INSTRING,c)}\Reads and returns a ~STRING~ through channel !<c>.
+
+3<<PRINTF>(2c3,2d713,2d723,...,2d7n3)1\Writes arguments 2d711, 2d721, ...#2d7n1
+through channel !<c> in the manner of ~PRINT~.
+
+3<<FORMATF>(2c3,2s713,2s723,...,2s7n3)1\Performs formatted
+numeric output on channel !<c> in the manner of ~FORMAT~.
+
+{fn(EOF,c)}\Returns ~TRUE~ if the input file
+on channel !<c> is at end-of-file.
+
+3<<CLOSE>(2c713,2c723,...,2c7n3)1\Closes files on channels 2c711, 2c721, ...#2c7n1.
+Closes all open files if called with no arguments.
+
+{fn(OPENED,c)}\Returns ~TRUE~ if a file is open on channel !<c>.
+
+~<<FREE.CHANNEL>~\Returns the number of the first free channel,
+or ~NULL~ if none are available.
+
+{fn(POSITION,c,p)}\Positions the disk file on channel !<c>
+so that the !<p>th byte is referenced next.
+Byte numbering begins at 1 on the PDP-10 and at 0 on the
+PDP-11.
+
+.cat(Operator Definition Functions)
+
+{fn(UNARY,s,f,p)}\Associates the unary operator described by
+the ~STRING~ !<s> with the function !<f>, in such a way that the
+use of the operator in a unary context will cause !<f> to be called.
+An operator is a sequence of from one to four characters
+taken from the set 3!#$%&+-*/^_.:;,<=>\[]()@1#.
+The ~INT~eger !<p>, if given, specifies the precedence
+of the operator (the value of ~DEF.UNARY.PREC~ is used otherwise).
+
+{fn(BINARY,s,f,p,a)}\Associates the binary operator described
+by the ~STRING~ !<s> with the two-argument function !<f>,
+in a manner similar to {fn(UNARY,s,f)}.
+If given, !<p> and !<a> denote the precedence and associativity
+of the operator (the values of ~DEF.BINARY.PREC~ and
+~DEF.ASSOC~ are used otherwise).
+
+{fn(UNARY.DEF,o)}#{sub(10)}\Returns as a ~STRING~ the name of the function
+associated with the unary operator !<o>, or "" if !<o> is not
+defined as a unary operator.
+
+{fn(UNARY.PREC,o)}#{sub(10)}\Returns as an ~INT~ the unary precedence of the
+operator !<o>, or zero if !<o> is not defined as a unary operator.
+
+{fn(BINARY.DEF,o)}#{sub(10)}\Returns as a ~STRING~ the name of the function
+associated with the binary operator !<o>, or "" if !<o> is not
+defined as a binary operator.
+
+{fn(BINARY.PREC,o)}#{sub(10)}\Returns as an ~INT~ the binary precedence of the
+operator !<o>, or zero if !<o> is not defined as a binary operator.
+
+{fn(ASSOCIATIVITY,o)}#{sub(10)}\Returns the ~STRING "LEFT"~
+or ~"RIGHT"~ denoting the associativity of the binary operator !<o>,
+or "" if !<o> is not defined as a binary operator.
+
+{fn(OPERATORS)}#{sub(10)}\Returns a ~TUPLE~ of ~STRING~s enumerating
+all currently defined operators (both unary and binary).
+
+{fn(RENUMBER,n)}#{sub(10)}\Adjusts the precedence of all defined operators
+so that subsets of equal-precedence operators are separated
+by !<n> (which must be a positive ~INT~eger).
+
+{fn(IVERSONIAN)}#{sub(10)}\Changes the precedence of all defined operators,
+and changes the values of ~DEF.UNARY.PREC~, ~DEF.BINARY.PREC~, and
+~DEF.ASSOC~ so that PPL conforms to Iversonian precedence
+(see {"Section!" iversonian}).
+
+.cat(Built-In Functions for User-Defined Data)
+
+{fn(LENGTH,a)}\Returns an ~INT~ which is the number
+of components in the value !<a>.  If !<a> is atomic,
+{fn(LENGTH,a)} is 1.
+
+{fn(L.BOUND,a)}\Returns the lower bound
+of !<a>, where !<a> may be any sequence or structure.
+
+{fn(TYPE,a)}\Returns the data type of the value
+!<a> expressed as a ~STRING~.
+
+{fn(CLASS,a)}#{sub(10)}\Returns as a ~STRING~ the class of object denoted
+by the global identifier !<a>.  The result is one of the
+following:
+.begin nofill indent 30 tabs 45 select 3
+<<UNASSIGNED>\<<ATOMIC.TYPE>
+<<VARIABLE>\<<COMPOSITE.TYPE>
+<<SYSTEM.FN>\<<ALTERNATE.TYPE>
+<<USER.FN>\<<SELECTOR.NAME>
+.end; once preface 0 continue
+These class names are also defined as
+built-in functions of one argument that return ~TRUE~ if the
+argument belongs to the stated class and ~FALSE~ otherwise;
+e.g. ~UNASSIGNED(X)~ returns ~TRUE~ if ~X~ is undefined and ~FALSE~ otherwise.  (Only ~UNASSIGNED~ is implemented in PPL-11.)
+
+~<<DATA.DEFINITIONS>~\Returns a ~TUPLE~ of ~STRING~s enumerating
+the names of all data definitions made by the user.
+
+{fn(MAKE,t,n,e)}\Constructs a variadic sequence of type !<t> with
+!<n> elements, each of whose value is !<e>.
+
+{fn(CONCAT,a,b)}\Concatenates !<a> and !<b>, which must
+be variadic sequences of the same type.
+
+{fn(IDENTICAL,a,b)}#{sub(10)}\Returns ~TRUE~ if !<a> and !<b> refer to (i.e., !<share>) the same object.
+
+.cat(Mathematical Functions)
+
+{fn(ABS,a)}#{sub(11)}\Returns the absolute value of !<a>, which may be
+an ~INT~, ~REAL~ or ~DBL~.
+
+{fn(SIN,a)}\Returns the sine of !<a>, where
+!<a> is an ~INT~, ~REAL~, or ~DBL~ expressing
+an angle in radians. The result is always ~REAL~ in PPL-10.
+In PPL-11, the result is ~REAL~ if !<a> is of type ~INT~ or ~REAL~
+and ~DBL~ if !<a> is of type ~DBL~.
+
+{fn(COS,a)}\Returns the cosine of !<a>,
+where !<a> is an angle expressed in radians.
+
+{fn(TAN,a)}#{sub(11)}\Returns the tangent of !<a>, where !<a> is an angle expressed
+in radians.
+
+{fn(ATAN,a)}\Returns the arctangent of !<a>,
+where !<a> is an ~INT~, ~REAL~, or ~DBL~.
+The result is a ~REAL~ or ~DBL~ expressing an angle
+in radians.
+
+{fn(SQRT,a)}\Returns the square root of !<a>,
+which may be ~INT~, ~REAL~, or ~DBL~.
+
+{fn(EXP,a)}\Returns the base e exponential of !<a>,
+which may be ~INT~, ~REAL~, or ~DBL~.
+
+{fn(LN,a)}\Returns the natural logarithm of !<a>,
+which may be ~INT~, ~REAL~, or ~DBL~.
+
+{fn(LOG,a)}#{sub(11)}\Returns the common (base 10) logarithm of !<a>.
+
+{fn(RANDOM,a)}\Returns a pseudo-random ~REAL~
+in the range zero to one (non-inclusive).
+If !<a> (~INT~, ~REAL~, or ~DBL~) is
+greater than zero, the random number generator is
+initialized to !<a>; if less than zero, it is initialized
+to the time of day; if equal to zero, no initialization
+is performed.
+
+.cat(Miscellaneous Functions)
+
+~<<SYS>~\Causes PPL to return control to the timesharing monitor.
+(In PPL-10, control may then be returned to PPL by issuing
+the ~REENTER~ command.)
+
+~<<LOGOUT>~#{sub(10)}\Causes PPL to terminate your session and log your job
+off the computer.
+
+{fn(SLEEP,n)}\Causes program execution to stop
+and proceed after !<n> seconds, where !<n> is an ~INT~eger
+less than 64.
+
+~<<DAYTIME>~\Returns as an ~INT~ the time of day in
+milliseconds since midnight.
+On the PDP-11, this value is in seconds since midnight.
+
+~<<DATE>~\Returns the current date and time as a ~STRING~
+in the form "!<dd>-!<mmm>-!<yy>#!<hh>:!<mm>:!<ss>", with a Tab between the
+date and time.  For example:  ~"13-SEP-74 13:57:23"~.
+
+~<<FUNCTIONS>~#{sub(10)}\Returns a ~TUPLE~ of ~STRING~s enumerating the names of
+all user-defined functions.
+
+~<<VARIABLES>~#{sub(10)}\Returns a ~TUPLE~ of ~STRING~s enumerating the names
+of all global variables currently defined.
+
+{fn(NOT,a)}\If !<a> is a ~BOOL~, then the logical
+complement of !<a> is returned.  If !<a> is an ~INT~, then
+an ~INT~ is returned which is the binary ones' complement
+of the internal representation of !<a>.
+
+{fn(IDIV,a,b)}\Identical to {fn(DIV,a,b)}, except that if both !<a> and
+!<b> are of type ~INT~, the result is always of type ~INT~ with the
+remainder from the division thrown away.
+
+{fn(EXECUTE,s)}#{sub(10)}\Causes PPL to evaluate the ~STRING~ !<s> as program text.
+
+3<<PURGE>(2f713,2f723,...,2f7n3)1#{sub(11)}\Deletes the program text of the functions
+2f711, 2f721, ... 2f7n1.  The functions may still be executed, but
+may no longer be displayed, edited, or written onto files.
+If ~PURGE~ is called with no arguments, all currently defined
+functions are affected.
+~PURGE~ is used to gain more room when PPL's working space is
+exhausted.
+
+{fn(STACKS,n)}#{sub(11)}\Specifies the amount of internal stack storage used
+by the PPL evaluator, where !<n> is an ~INT~ greater than zero.
+This may be used to continue from errors such as "Control
+stack overflow".  3 units of stack space are initially allocated.
+
+~<<PROTOCOL>~#{sub(11)}\All user input and computer output after execution
+of the ~PROTOCOL~ command is copied into the file ~PPL.PROTOCOL~ as a
+record of the terminal session.
+
+~<<UNPROTOCOL>~#{sub(11)}\Terminates the operation of the ~PROTOCOL~ command
+and closes the ~PPL.PROTOCOL~ file.
+
+{fn(EXEC,p,a,b,#...#)}#{sub(11)}\Directs the Unix operating system to
+run the program !<p> with arguments !<a>, !<b>, and so forth.
+Each of the arguments to ~EXEC~ must be a ~STRING~.
+After the conclusion of the program, control returns to PPL.
+The ~EXEC~ function does not return a value unless an error
+condition occurs in the program being run, in which case the
+Unix error number is returned as the value of ~EXEC~.
+.end
+
+.app(Automatic Type Conversion,apptype,yes)
+
+In all PPL's built-in functions called by
+the execution of operators, a certain amount of
+automatic !<type conversion> takes place for operands
+that are not suitable.  The circumstances under
+which this will take place are explained below;
+all other combinations will result in the execution
+error message "Illegal argument type".
+
+Arithmetic operators ('+', '-', '*', and '/') convert their
+operands as follows: A ~CHAR~ is converted to
+an ~INT~ by taking its 7ASCII* character code
+(see {"Appendix!" appascii}).  A ~BOOL~ is converted to
+the integer value 1 if it is ~TRUE~ and 0 if ~FALSE~.
+If the two operands are now not of the same type,
+the !<weaker> operand is converted to the type
+of the !<stronger>, with strength defined
+on the scale ~INT < REAL < DBL~.
+(Additionally, if the division of an ~INT~ by another ~INT~
+yields a nonzero remainder, both operands are converted
+to ~REAL~s and the result is ~REAL~.)
+
+The unary operator '-' allows
+an operand of type ~INT~, ~REAL~, ~DBL~, or ~BOOL~.
+The result is always of the same type as
+the operand.  For ~INT~, ~REAL~, or ~DBL~, the
+result is the arithmetic negation of the
+operand, whereas for ~BOOL~ it is the
+logical complement.
+
+Four of the relational operators ('<', '<=', '>', and '>=')
+allow only operands of type ~INT~, ~REAL~, and ~DBL~.
+If the two operand types are not the same, conversion
+is performed as for arithmetic operations.
+PPL-11 also allows these operators to be used with ~STRING~s
+as described in {"Section!" builtintypes}.
+
+Two of the relational operators ('=' and '#')
+allow operands of type ~BOOL~ or ~CHAR~ if
+both operands are of the same type.  No conversion
+is necessary in these cases.  Conversion for
+arithmetic types is the same as for the other four
+relational operators.
+The '=' and '#' operators may also be used to
+compare ~STRING~s; two ~STRING~s are equal if and only
+if they are the same length and corresponding characters
+are the same.  A future version of PPL
+will allow the comparison of arbitrary user-defined
+data.
+
+In PPL-10, Boolean operations ('&' and '!') carry a somewhat
+more involved convention.  If both operands are
+of type ~BOOL~, then no conversion is necessary.
+Otherwise, at least one operand must be of
+type ~INT~ or an error will result.
+A logical operation between non-~BOOL~s
+consists of the appropriate operation performed
+bitwise between the operands, using the
+36-bit PDP-10 hardware representations for
+~INT~, ~REAL~, and ~DBL~.  If a ~BOOL~
+is one of the operands, it is represented
+as a word containing all zeroes (for ~FALSE~) or
+all ones (for ~TRUE~).  The result
+of the operation has the type of the 'stronger'
+of its operands, with strength defined on the
+scale ~BOOL < CHAR < INT < REAL < DBL~.
+For completeness, we present the format of the
+internal representation for the five atomic types:
+
+.begin indent 0,8 tabs 9
+~INT~\A 36-bit 2's complement integer (see PDP-10 System
+Reference manual).
+
+~REAL~\A 36-bit hardware floating point number.
+
+~DBL~\A 72-bit hardware floating point number (in KA10 format).
+
+~CHAR~\A right-justified integer 7-bit 7ASCII* character
+code.
+
+~BOOL~\A word containing the integer 0 (for ~FALSE~)
+or 1 (for ~TRUE~).
+.end
+
+In PPL-11, only ~BOOL~s and ~INT~s are allowed as operands of '&' and '!'.
+
+The ~GOTO~ operation (also the '-->' operator
+and the ~UGOTO~ and ~CGOTO~ built-in functions)
+requires a right operand which is
+an ~INT~.  Note that a relocatable
+line number, which is what is usually used, is really an ~INT~
+with special properties which come into play
+only during text editing.  The left operand
+of the '-->' operator must be a ~BOOL~.
+
+The '==' operator allows any value as its left
+operand.  Its right operand must be a valid predicate;
+that is, an atomic type name (~INT~, ~REAL~, ~DBL~,
+~BOOL~, or ~CHAR~), a user-defined data type name (e.g. ~COMPLEX~),
+or a name defined in an alternate definition (e.g. ~ARITH~).
+
+.app(Summary of Editing Commands,appediting,yes)
+.begin nofill tabs 9
+
+To display the text of a function ~F~:
+3\?F1
+
+To display line 5 of the function ~F~:
+3\?F[5]1
+
+To display lines 5 through 7 of the function ~F~:
+3\?F[5:7]1
+
+To open function ~F~ for editing, starting at line 3:
+3\$F[3]1
+
+While within a function, move to line 2 for editing:
+3\[2]1
+
+To insert a statement between 4 and 5:
+3\[4.5]1
+
+To close the function (causing renumbering and translation):
+3\$1
+
+Control characters:
+
+.fill indent 2,14 tabs 15 preface 0
+
+Return\Terminate current statement, sequence to next.
+
+Rubout\Delete last character (Control-A under Tenex).
+
+Control-U\Delete current typein and try again
+(Control-Q under Tenex).
+
+Escape\Open current text for
+advanced text editing.
+.end
+
+Text editor commands ('$' stands for Escape):
+
+.begin skip 1 indent 2,35 preface 0 tabs 36
+3[!<r>] !<n> REPLACE !<string>{sub(1)} $ !<string>{sub(2)}1\In the range !<r>, replace
+!<n> occurrences of !<string>{sub(1)} by !<string>{sub(2)}.
+
+3[!<r>] !<n> DELETE !<string>1\In the range !<r>, delete !<n> occurrences of !<string>.
+
+3[!<r>] !<n> INSERT !<string>{sub(1)} $ !<string>{sub(2)}1\In the range !<r>, insert !<string>{sub(1)}
+after the first !<n> occurrences of !<string>{sub(2)}, or at the current pointer
+position if !<string>{sub(2)} is not specified.
+
+3[!<r>] !<n> FIND !<string>1\In the range !<r>, leave the pointer after the !<n>th
+occurrence of !<string>.
+
+3[!<r>] TYPE1\Type out all statements in the range !<r>.
+
+3[!<r>] KILL1\Delete all statements in the range !<r>.
+
+3VERBOSE1\Perform an automatic TYPE command after every operation
+that uses string arguments.
+
+3CONCISE1\Leave verbose mode.
+.end
+
+.app(Summary of Data Definitions,appdata,yes)
+
+.begin nofill tabs 9,25
+.skip 1
+Structure definition:
+3\$COMPLEX = [RP:REAL, IP:REAL]1
+.skip 1
+Where\~COMPLEX~ is the new type name,
+\~RP~, ~IP~ are selector names for the components, and
+\~REAL~ is the element type for both components.
+.skip 1
+Sequence definition (variadic, i.e. indefinite upper bound):
+3\$VECTOR = [1: ] ARITH1
+.skip 1
+Where\~VECTOR~ is the new type name,
+\1 is the lower bound for indexing,
+\the upper bound is unspecified, and
+\~ARITH~ is the element type.
+.skip 1
+Sequence definition (fixed):
+3\$ROW4 = [1:4] INT1
+.skip 1
+Where\~ROW4~ is the new type name,
+\1 is the lower bound,
+\4 is the upper bound, and
+\~INT~ is the element type.
+.skip 1
+Alternate definition:
+3\$ARITH = INT ! REAL ! DBL1
+.skip 1
+Where\~ARITH~ is the new predicate, and
+\~INT~, ~REAL~, and ~DBL~ are the types that are
+\  to be considered instances of an ~ARITH~.
+.skip 1
+Built-in data definitions:
+.skip 1
+3\$STRING = [1: ] CHAR
+\$TUPLE = [1: ] GENERAL
+\$ATOMIC = INT!REAL!DBL!BOOL!CHAR!NONE1
+.skip 1
+Also:\3SEQUENCE1\Any fixed-length sequence.
+\3V.SEQUENCE1\Any variadic sequence.
+\3GENERAL1\Any data type.
+.end
+
+.app(ASCII Character Codes,appascii,yes)
+.begin nofill tabs 21,41
+.skip 1
+    Capital letters\     Small letters\       Other
+-------------------\-------------------\-------------------
+        Decimal Octal\        Decimal Octal\        Decimal Octal
+.skip 1 tabs 9,15,21,29,35,41,49,55
+3  A\ 65\101\  a\ 97\141\1Space3\32\ 40
+  B\ 66\102\  b\ 98\142\  !\33\ 41
+  C\ 67\103\  c\ 99\143\  "\34\ 42
+  D\ 68\104\  d\100\144\  #\35\ 43
+  E\ 69\105\  e\101\145\  $\36\ 44
+  F\ 70\106\  f\102\146\  %\37\ 45
+  G\ 71\107\  g\103\147\  &\38\ 46
+  H\ 72\110\  h\104\150\  '\39\ 47
+  I\ 73\111\  i\105\151\  (\40\ 50
+  J\ 74\112\  j\106\152\  )\41\ 51
+  K\ 75\113\  k\107\153\  *\42\ 52
+  L\ 76\114\  l\108\154\  +\43\ 53
+  M\ 77\115\  m\109\155\  ,\44\ 54
+  N\ 78\116\  n\110\156\  -\45\ 55
+  O\ 79\117\  o\111\157\  .\46\ 56
+  P\ 80\120\  p\112\160\  /\47\ 57
+  Q\ 81\121\  q\113\161\  0\48\ 60
+  R\ 82\122\  r\114\162\  1\49\ 61
+  S\ 83\123\  s\115\163\  2\50\ 62
+  T\ 84\124\  t\116\164\  3\51\ 63
+  U\ 85\125\  u\117\165\  4\52\ 64
+  V\ 86\126\  v\118\166\  5\53\ 65
+  W\ 87\127\  w\119\167\  6\54\ 66
+  X\ 88\130\  x\120\170\  7\55\ 67
+  Y\ 89\131\  y\121\171\  8\56\ 70
+  Z\ 90\132\  z\122\172\  9\57\ 71
+\\\\\\  :\58\ 72
+  [\ 91\133\\\\  ;\59\ 73
+  \\ 92\134\\\\  <\60\ 74
+  ]\ 93\135\\\\  =\61\ 75
+  ^\ 94\136\\\\  >\62\ 76
+  _\ 95\137\\\\  ?\63\ 77
+\\\\\\  @\64\100
+1Bell3\  7\  7
+1Tab3\  9\ 11
+1LineFeed3\ 10\ 12
+1Return3\ 13\ 15
+1Escape3\ 27\ 331
+.end
+
+.app(The Syntax of PPL,appsyntax,yes)
+
+The following is the BNF (Backus Normal Form) grammar of PPL,
+which was used to generate its parse tables.
+<atom> stands for any identifier or constant,
+and <op> stands for any unary or binary operator.
+<rpad> is an end-of-line marker analagous to
+Return.  The character '|' is the metasymbol
+used to separate alternatives.
+The lexical analyzer determines the decomposition
+of operator strings into operators and special symbols,
+and also processes labels; thus, that mechanism does
+not appear here.  The redundancy of <form> and <form-1>
+is necessary to make the grammar unambiguous
+(by avoiding the 'dangling ~ELSE~' problem) and has
+no other significance.
+The ambiguity in the rules defining <expression> is resolved
+through application of the precedence of the operators involved.
+
+.begin nofill tabs 17
+.skip 1
+<statement> ::=\<form> <rpad> | <rpad> |
+\<for-prefix> <dothru> <expression> <rpad>
+
+<form> ::=\<s-form> ; <form> | <s-form> | <if-prefix> <form> |
+\<if-prefix> <form-1> <els> <form> |
+\<for-prefix> <do> <form> |
+\~WHILE~ <expression> <do> <form>
+
+<form-1> ::=\<s-form> ; <form-1> | <s-form> |
+\<if-prefix> <form-1> <els> <form-1> |
+\<for-prefix> <do> <form-1> |
+\~WHILE~ <expression> <do> <form-1>
+
+<s-form> ::=\<expression> | ~GOTO~ <expression> |
+\~RETURN~ | ~RETURN~ <expression> |
+\~REPEAT~ <form> ~UNTIL~ <expression>
+
+<expression> ::=\<op> <expression> | <term> |
+\<expression> <op> <expression>
+
+<term> ::=\<atom> | <term> ( <list> ) | <term> ( ) |
+\<term> [ <list> ] | [ <list> ] | [ ] | ( <form> )
+
+<list> ::=\<form> | <list> , <form>
+
+<if-prefix> ::=\~IF~ <expression> ~THEN~ | <expression> =>
+
+<for-prefix> ::=\~FOR~ <for-list> | <for-list>
+
+<for-list> ::=\<expression> : <expression> |
+\<expression> : <expression> : <expression>
+
+<do> ::=\~DO~ | ;
+
+<dothru> ::=\~DOTHRU~ | ;;
+
+<els> ::=\~ELSE~ | ::
+.end
+
+.app(Known Problems in PPL,appproblems,yes)
+.x System Errors
+
+PPL is still under development and
+will remain so indefinitely.  Thus, it is
+always possible that an internal error will
+occur.  Furthermore, PPL is not fully 'user-proof'
+in several areas;  that is, the user can do
+something so bad as to cause an internal error.
+
+When a system error occurs, a ~RESET~ is executed
+automatically and a message is printed.
+If the attempted recovery fails, control returns
+to the timesharing monitor
+(signified by a printout of a period or at-sign at the left margin).
+Nearly all possible errors are detected internally, and
+PPL is generally able to recover.
+'Recovery' in this sense means that after PPL
+does an implicit ~RESET~, functions, data definitions,
+operator definitions, and global data are intact.
+
+Upon successful recovery, it
+is wise at this point to save the
+current environment
+(using the ~SAVE~ procedure), and also
+to save programs and definitions separately
+using ~WRITE~.
+This is because internal data might
+have been affected by the error in such
+a way that a non-recoverable error could
+occur later.
+Note that internal errors are not eliminated
+by ~SAVE~ing and ~RESTORE~ing the environment.
+
+There are a number of ways
+in which a user may bring about a system
+error.  A few will be mentioned here
+to enable the user to know what to avoid.
+
+For example, using the '__' operator (~NONCOPY~ assignment),
+it is possible to create structures that
+are 'cyclic' in nature.  For example:
+
+.examp
+\X_[2,0,3]
+\X[2]__X
+.end
+
+There is nothing illegal about this.  However,
+PPL is not, at present, able to
+print out such a structure intelligently;  if an attempt is
+made to do so, a system pushdown-list overflow
+will occur (PPL always recovers successfully
+in this case).  For example:
+
+.examp
+\X
+[2,[2,[2,[2,[2,[2,[2,[2,[2,[2,[2,[2,[2,[2,[2,[2,[2,[2,[2,[2,
+[2,[2,[SYSTEM ERROR DETECTED AT 400502; PDL OV
+[RESET EXECUTED]
+.end
+
+PPL makes heavy demands
+on core memory resources.
+In the event PPL runs out of working space
+and cannot obtain more from the time-sharing
+monitor, it is forced to stop execution.  The message
+"Pointer zone exhausted" or "Data zone exhausted"
+is printed in this case. It is not usually possible
+to continue unless more memory can be obtained.
+If this error occurs unexpectedly in PPL-10, it is wise to check
+for an unintentional
+infinite regress caused by redefining a common
+built-in operator and using it within the function
+associated with the new meaning of the operator (see {"Section!" opdef}).
+(In PPL-11, this error will result in a "Control stack overflow".)
+
+The designers of PPL would appreciate
+reports of system errors and other problems;  only in this way can
+attempts be made to remove them.
+However, such reports, to be useful, must
+be as complete as possible.  Sample typescripts and
+program listings should be included, and reports should
+be submitted to one of the individuals listed in the
+Introduction ({"Section!" ack}).
+
+.app(Supplementary Information for PPL-10,apsup10)
+.asec(|Erasing Data Definitions|)
+
+Erasing a data definition (using the
+~ERASE~ procedure) is generally not a good idea.
+If it must be done, the user should take great
+care that he has first erased !<all> instances
+of data constructed according to that definition.
+(In PPL-10, failure to observe this precaution may lead to
+system errors such as "Garbage collection error, data definition missing".)
+
+.asec(|Special Handling of the REENTER Command|)
+
+PPL-10's normal handling of the monitor ~REENTER~
+command is to set a flag, then resume whatever it was doing
+before.  At a later, more convenient point in PPL's
+execution cycle, this flag is tested, and
+suspension occurs if it is set.  However, it is possible
+that this operation will fail, either because input has
+been requested from a hung device or because of an internal
+error within PPL itself.  If this occurs, performing
+a second double-Control-C, ~REENTER~ operation
+will cause PPL to attempt an automatic
+~RESET~ and return control to the user in the top-level
+environment.
+
+.asec(|Other Known Bugs and Deficiencies|)
+
+This section describes problems that were known at the
+time this manual was prepared.  These problems
+may be fixed in a future version of PPL.
+
+If a parameterless function is called with arguments,
+the error is not detected at the time of the call.
+Instead, the call is made, and an error
+usually occurs when the function returns.
+
+If the user performs a Control-C, ~REENTER~ operation
+when PPL is requesting input from the terminal via ~INSTMT(0)~ or
+~INSTRING(0)~, a system error sometimes occurs.
+Thus, it is suggested that ? and ?" be used in place
+of ~INSTMT(0)~ and ~INSTRING(0)~.
+
+At present, the operation of the built-in function ~READ~
+consists simply of opening the specified file, then redirecting
+subsequent input requests to that file rather than the user's
+console.  ~READ~ does not itself perform any input.
+This means that a running program cannot successfully execute
+a ~READ~ to read in new functions and/or data.  For now,
+the following user-defined function may be used to perform
+the desired operation:
+
+.examp
+\$XREAD(F); C,T
+   [1]\INPUT(C_FREE.CHANNEL,F)
+   [2]\WHILE -EOF(C) DO T_INSTMT(C)
+   [3]\CLOSE(C)
+   [4]\$
+.end
+
+If end-of-file is encountered within a function definition
+being read from a file, the correct error message will be
+printed, but then a system error will occur.  The result
+will be as if the function in question had never been opened.
+
+It is not presently possible to write a comment on a function header (the first line of a function definition) or on a data definition.
+
+.asec(Old Text Editor)
+
+Editing in PPL-10 versions prior to 53 is limited to moving through a program
+to replace, insert and delete single lines and to edit the actual
+text of a statement using the character editor described below.
+None of the editor command structure for more advanced editing ({"Section" charedit}) is
+supported.
+The mechanism for insertion and replacing lines remains the same,
+as does the facility for sequencing through the program steps.
+Only two editing operations are entirely changed by the new editor:
+the deletion of lines and editing within lines.
+
+In order to delete an existing program step under the old editor,
+the user must sequence to the appropriate line in the usual manner
+as if to replace or edit that line.  Typing a control-G (^G) deletes
+the current line without replacing it.  For example, the following
+editing sequence deletes line [6] of ~$TEST~.
+
+.examp
+	$TEST[6]
+   [6]	^G
+   [7]	$
+.end
+
+Intraline editing is provided from the old PPL editor by entering a
+special character editing mode, invoked by pressing the Escape key.  Depending on when Escape is typed,
+PPL will now take one of three actions.  If no function is open
+and Escape is the first character typed on a line, PPL will open the
+most recently typed in statement for character editing.
+If it is not the first character on a line, the current line is
+terminated and opened for editing.  If a function is open
+at the time, and Escape is the first character typed after PPL
+types the line number, then the previous text of that statement
+is opened for editing if it exists, otherwise the statement
+most recently typed in by the user is opened.
+
+The selected text is now retyped by PPL on the next line.  (If the
+statement contains continuation lines, only the first line is typed).
+PPL then prints ~EDIT>~ and positions the typehead below the first
+character on the line.
+
+The user now has several options.  If a printing character, a space,
+or a Tab is typed, it replaces the character immediately above the
+typehead.  If a Rubout (Control-A on Tenex) is typed, it deletes
+the character above the typehead; a back-slash (\) is echoed.
+Characters in the existing line may be passed over without change
+by the use of any of the following control characters:
+
+.begin indent 0,15 tabs 16
+Control-N\Passes by and echoes the Next character on the line.
+
+Control-E\Passes over and echoes every character until the End
+of the current line (leaving the typehead at the end).
+
+Control-T\Passes over and echoes Ten characters.
+
+Control-S!<c>\Waits for a single search character !<c> to be
+typed in, then passes over and echoes characters until the search
+character is found.  Successive continuation lines will be searched
+if required until that character is found.  If it is not found, the
+typehead will be left at the end of the entire statement.
+
+Control-X\Passes over and echoes characters until a separator
+character (something other than a letter or digit) is reached.
+.end
+
+Additionally, there are a number of control characters with
+special functions during character editing mode.  These are:
+
+.begin indent 0,15 tabs 16
+Line-Feed\Moves to and retypes the next continuation line
+if one exists.  This line may now be edited.
+
+Escape\Retypes the first line of the statement and re-opens
+it for editing.
+
+Control-R\Retypes the current line of the statement and
+re-opens it for editing.
+
+Return\Closes the entire statement, with changes, and enters
+it just as if the user had typed it directly.  If a function is open,
+the statement is stored; if not, the statement is immediately executed.
+
+Control-A\(Control-B on Tenex)  This character is used for
+insertion.  PPL responds by spacing down one line and printing
+an upward arrow.  This points to the character on the current line
+before which characters are to be inserted.  All printing characters, as well as space and Tab, may now be typed for insertion.  In this
+mode, the Rubout key (control-A on Tenex) will delete and echo
+the most recently inserted character (if all inserted characters
+have been rubbed out, it will start deleting characters before
+the insertion in the current line).  Insertion mode is terminated
+by typing any control character, which will have its normal function.
+.end
+
+One useful rule to remember with regard to control characters is
+that all characters recognized by PPL cause some visible action.  If
+an illegal control character is typed, it is simply ignored.
+
+.app(Supplementary Information for PPL-11,apsup11)
+
+In concept, PPL-10 and PPL-11 are identical.
+However, due to architectural differences between the two
+machines and the fact that the implementations are at slightly
+different stages of development, some incompatabilities do exist.
+This section describes a number of these differences and reflects
+the state of PPL-11 through Version 7.
+
+.asec(|PPL under the Unix Operating System|)
+
+The Unix operating system has its own set of conventions that
+affect the operation of PPL-11, and in some cases result in
+incompatabilities with respect to the PDP-10 version.
+Several of these areas are described below.
+
+Character conventions in Unix are different from those on the
+PDP-10 in two important respects.
+First, the standard end-of-line sequence for Unix is the single
+linefeed character (7ASCII* 10 decimal) as opposed to PDP-10
+convention which uses the two-character Return/Line-Feed
+sequence.
+Secondly, the standard case for alphabetic characters in Unix
+is lower case rather than the PDP-10 upper case standard.
+Programs exist on the PDP-11 for converting files between
+Unix and PDP-10 format, and are described in the Harvard
+Terminal User's Guide.
+
+To simplify the problem caused by lower case operation,
+identifiers and ~STRING~s differing only in case are considered
+to be equal.
+Single characters, however, must currently match in case.
+
+Like most Unix subsystems, PPL may be given arguments when
+it is first started from the Shell.
+Arguments are of the form:
+
+.examp
+\[-E] [-N] [-M] [!<pathname>.ENV]
+.end
+
+where brackets indicate that the argument is optional.
+The ~-E~ switch, if included, will prevent PPL from using
+its error message file and cause PPL to report errors using a numerical
+code.
+The ~-N~ switch prevents PPL from writing out its standard header
+message.
+The ~-M~ switch is useful only in special versions of PPL which
+include a metering package.
+For such implementations, the ~-M~ switch causes PPL to write out
+its symbol table.
+If the !<pathname>~.ENV~ specification is used, PPL will restore
+the specified environment.
+
+PPL will execute commands from the primary input port,
+even if the primary input port is not the user's teletype.
+If, however, an end of file is encountered when some other
+port is used as the primary input, PPL will exit to the monitor.
+
+On the PDP-10, files are not actually stored permanently until
+the file is closed.
+In Unix, files exist permanently immediately after they are
+opened.
+It is still necessary to use the ~CLOSE~ command, however.
+
+.asec(|Memory Management|)
+
+
+PPL-11 can provide the user with approximately 29K of
+working space.
+This 29K is divided into three logical pieces.
+
+.begin nofill group tabs 9
+
+\(1)  Control Stack
+\(2)  Name/Object Stack
+\(3)  General Working Space
+.end
+
+Provided that the user does not press too closely to the
+29K limit, PPL's core allocation policies work silently
+in the background and the user need never worry.  However,
+if PPL ever runs out of room for any one of these three logical
+pieces, an error message will be issued.
+The individual cases are discussed below.
+
+!<Control Stack Overflow.>  This occurs when a program is deeply
+nested in recursive calls and PPL has no more space to allocate
+for the Control Stack.
+When this error occurs, PPL will print a suitable error message
+and perform an automatic ~RESET~.
+
+The best way to circumvent this problem is to keep the number
+of recursive calls down.
+The user should note, however, that by keeping the
+Name/Object stack and General Working Space size to a minimum,
+the user can insure that the maximum amount of space is
+available to the Control Stack.
+
+!<Name/Object Stack Overflow.>  This error occurs whenever
+PPL's internal Name or Object Stack overflows.  The first time
+this error occurs, PPL will suspend execution and the
+user may examine the values of local variables.
+He may also continue execution.
+If the Name/Object Stack again overflows, however, an automatic
+~RESET~ will occur.
+
+!<Insufficient General Working Space.>  When PPL can not
+obtain enough general working space, it will suspend execution
+and print a warning message.
+The user may attempt to continue at this point, although such
+an attempt will usually fail, unless he deletes enough material
+(programs or data) to provide enough working space for PPL to
+continue.
+To reduce storage requirements for programs, a special
+function ~PURGE~ is defined which deletes the program text
+from user functions.
+Such functions may still be executed, but may not be examined,
+edited or written out.
+In light of this, ~PURGE~ should only be used after the program
+text has been saved using the ~WRITE~ command.
+~PURGE~ may be called with no arguments, in which case, all
+functions will be purged, or individual functions may be given
+as arguments.
+Using ~PURGE~ typically lowers the storage required for functions
+by about 30%.
+
+The amount of memory allocated to the three regions may be changed
+by calling the function {fn(STACKS,n)} which causes !<n> units of core
+to be allocated to each of the three regions.
+
+.asec(|Special PPL Versions|)
+
+Certain more-recent releases of PPL may contain a compiler which
+allows efficient machine code equivalents of PPL programs to be
+produced from user program text.
+Using the compiler, in some cases, can result in an improvement
+in program execution time of a factor of four.
+
+New releases may also contain the ~INGRES~ relational data base
+as a sublanguage embedded in the PPL system.
+This allows the user to employ a wide variety of data manipulation
+operations with improved efficiency.
+
+Further infomation concerning these versions will be included in
+the documentation which accompanies the particular release.
+
+.asec(|Additional Notes|)
+
+There are a number of built-in functions that are implemented
+in only one of the two major implementations of PPL.
+Generally, these differences, along with any differences
+in the operation of particular functions, have been described
+in the manual.
+Additional incompatabilities are noted here.
+
+When typed into PPL, ~STRING~s are limited in length to 200
+characters.
+
+.send contents 
+.skip 1
+. 
+.nchap(References)
+
+.begin indent 0,8 tabs 5
+[1]\Iverson,#K.E., !<A Programming Language>, Wiley,
+New York, 1962.
+
+[2]\Iverson,#K.E., Falkoff,A.D., et al, !<APL/360
+Manual of Operation>, IBM, Nov. 1967.
+
+[3]\Standish,#T.A., "A Preliminary Sketch of a Polymorphic
+Programming Language", Centro de Calculo Electronico,
+Universidad Nacional Autonoma de Mexico, July 1968.
+
+[4]\Standish,#T.A., "Some Features of PPL -- A Polymorphic
+Programming Language", !<Proc. of Extensible Language
+Symposium>, Christensen and Shaw (eds.), SIGPLAN
+Notices, Vol. 4, Aug. 1969.
+
+[5]\Standish,#T.A., "Some Compiler-Compiler Techniques for
+Use in Extensible Languages", !<Proc. of Extensible
+Language Symposium>, Christensen and Shaw (eds.),
+SIGPLAN Notices, Vol. 4, Aug. 1969.
+
+[6]\Standish,#T.A., !<An Introduction to PPL Programming>,
+Center for Research in Computing Technology, Harvard University,
+Sept. 1974.
+
+[7]\Taft,#E.A., "The Design and Implementation of PPL",
+Department of Applied Mathematics, Harvard University, May 1973.
+.end

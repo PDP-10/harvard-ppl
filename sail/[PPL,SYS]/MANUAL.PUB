@@ -1,0 +1,40 @@
+. << manual.pub -- top-level manuscript file for PPL manual >>
+.
+. << definition file >>
+.require "manual.dfs" source!file
+.setfont
+.
+.require "titlepage.pub" source!file
+.
+. << the manual itself .. each file is a chapter >>
+.insert contents
+.
+.portion body
+.page_0
+.require "intro.pub" source!file
+.require "starting.pub" source!file
+.require "programs.pub" source!file
+.require "editing.pub" source!file
+.require "builtin.pub" source!file
+.require "extension.pub" source!file
+.require "advanced.pub" source!file
+.require "appendix.pub" source!file
+.
+. << index >>
+.portion index
+.require "index.pub" source!file
+.
+. << table of contents >>
+.portion contents
+.require "contents.pub" source!file
+.
+. << symbol table -- not part of the final document!!!! >>
+.portion symtab
+.after page  
+.begin fill
+Symbol table for cross-referencing sections in PPL manual.
+THIS IS NOT PART OF THE FINAL DOCUMENT.  PLEASE THROW IT AWAY.
+.skip 1
+.indent 0,20 tabs 21 preface 0
+.receive
+.end

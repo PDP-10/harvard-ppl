@@ -1,0 +1,1418 @@
+.chap(PPL's Extension Features,extension)
+.see extension,language,|data definition, operator definition|
+
+The language facilities presented so far in this
+manual do not distinguish PPL from a number
+of other interactive, conversational programming
+languages that were available long before PPL
+was implemented.  The most notable of these
+are <<APL> (after which much of PPL's conversational
+mechanics were patterned) and <<JOSS> and its derivatives.
+Indeed, APL has a large set of
+elegant array operations and other features which
+are not present in PPL.
+
+What sets PPL apart from these is that it is
+an !<extensible language>; that is,
+it contains facilities for !<extending> the language
+in several directions.
+In fact, we have already presented one type of extension,
+namely the ability to enter user-defined functions,
+thereby extending the set of functions subsequently
+available to the user.  However, the ability to define
+functions is present in almost every programming language;
+thus, PPL is not an extensible language for this reason alone.
+
+The two areas of extension we shall now cover are (1)
+the definition of new unary and binary operators, and (2)
+the definition, construction, and manipulation of
+user-defined data types.
+
+.sec(User-Defined Operators,opdef)
+.see definition,operator,operator definition
+
+As has already been mentioned in passing,
+the execution of unary and binary operators is considered
+to be a special case of system function calling;
+thus, the expression 3A+B1  is evaluated as 3ADD(A,B)1.
+This is done through a predefined association between
+the operator '+' and the built-in function ~ADD~.
+However, the user is allowed to change this association
+and to define new operators.
+
+An operator in PPL is a sequence of
+one to four characters
+taken from the following set:
+
+.examp
+.x operator character
+.x character,used for operator
+\! # $ % & + - * / ^ _ . : ; , < = > \ [ ] ( ) @
+.end
+
+.see function,associating operator with,|UNARY, BINARY|
+New operators are defined and associated with built-in or user-defined
+functions of the programmer's choice by use of the functions
+~@/<UNARY,operator definition/>~ and ~@/<BINARY,operator definition/>~.  The call
+
+.examp
+\UNARY(!<o>,!<f>,!<p>)
+.end
+
+establishes a new unary operator !<o> (where !<o> is a ~@@<STRING,to describe operator>~
+of one to four characters chosen from the list above) and
+associates it with the function !<f>, which must be
+a function taking a single argument.  !<p>, if given, specifies
+the operator's precedence, which is an integer in the range
+1 to 32767.  We shall postpone discussion of precedence
+until later.
+
+For example, the statement
+
+.examp
+\UNARY("\/", SQRT)
+.end
+
+establishes a new unary operator '\/' which, when applied to
+some operand, returns its square root using the built-in
+function {fn(SQRT,a)}.  For example:
+
+.examp
+\\/3.17
+1.780449
+\FOR I_1:8 DO PRINT(\/I, " ")
+1. 1.414214 1.732051 2. 2.236068 2.44949 2.645751 2.828427
+\\/(3^2 + 4^2)
+5.
+.end
+
+Similarly, the built-in function
+
+.examp
+\BINARY(!<o>,!<f>,!<p>,!<a>)
+.end
+
+establishes a new binary operator !<o> and associates it with
+the function !<f> (built-in or user-defined), which must
+take two arguments.  The precedence !<p> and associativity !<a>
+will be discussed later and may be omitted in the call.
+
+In the following example, we shall
+create a function ~<<REMAIN>~, which takes
+two ~REAL~ arguments
+and returns the remainder resulting from dividing
+the first by the second.  We shall then associate
+this function with the binary operator '\';
+this is done by calling the built-in function ~BINARY~.
+Having done this, we may then use the '\' operator
+freely within expressions for
+computing the remainder.
+
+.examp
+\$REMAIN(A,B)
+   [1]\REMAIN_A-B*INT(A/B)
+   [2]\$
+
+\REMAIN(5.0,3.0)
+2.
+\BINARY("\",REMAIN)
+\5.0\3.0
+2.
+\(34.2+547.1)\37.0
+26.3
+.end
+
+Redefinition of existing operators
+.x redefinition of operator
+.x operator redefinition
+may be done in exactly the same manner.
+A word of caution is in order.
+When writing a function designed to take over the meaning of
+a commonly-used operator (such as '+'),
+the user must take care not to use that operator
+within the definition of the function.
+Any such use of the operator will result in a &/<recursive call/by/operator redefinition>
+of the function;  this is not usually what is
+intended!
+Also note that since the built-in operations
+are still accessible by name (the ~ADD~ function, for example),
+it is possible to restore the original meaning
+.x restoring original meaning of operator
+of an operator that has been redefined.
+For example:
+
+.examp
+\BINARY("+",ADD)
+.end
+
+As a trivial illustration of such redefinition, we might
+change the division operator so as to call the built-in function
+~<<IDIV>~ rather than ~<<DIV>~ (recall that in the division of an ~INT~ by another
+~INT~, ~IDIV~ throws away the remainder and always returns an ~INT~, whereas
+~DIV~ returns a ~REAL~ if the remainder is nonzero).
+
+.examp
+\7/3
+2.333333
+\BINARY("/",IDIV)
+\7/3
+2
+.end
+
+A more elaborate situation could arise were we to write a program
+in which all integer arithmetic needed to be done, say, modulo 256.
+Addition modulo 256 might be implemented as follows:
+
+.examp
+\$<<ADD.MOD.256>(A,B); S
+   [1]\S_ADD(A,B)
+   [2]\IF A==INT & B==INT THEN WHILE S>255 DO S_SUB(S,256)
+   [3]\RETURN S
+   [4]\$
+
+\BINARY("+",ADD.MOD.256)
+\23+45
+68
+\185+97
+26
+\42+95+142+88+196
+51
+\42.+95.+142.+88.+196.
+563.
+.end
+
+The operator '==' used in ~ADD.MOD.256~ is the '&<instance/operator> of'
+operator;  its value is ~TRUE~ if its left operand is of the type
+specified as its right operand, otherwise ~FALSE~.
+Hence the expression 3A==INT1 is ~TRUE~ if ~A~ is of type ~INT~
+and ~FALSE~ otherwise.
+
+Subtraction, multiplication, and division modulo 256 could be
+accomplished in much the same manner.  Notice that we were
+careful to preserve the existing behavior of the '+' operator
+in cases where one or both operands are not ~INT~s.
+
+The following operators have special meaning in
+the syntax of PPL and cannot be redefined:
+
+.examp
+.x reserved operator
+.x operator,reserved
+\(   )   [   ]   ,   ;   ;;   :   ::   =>
+.end
+
+However, it !<is> legal to define new operators
+that have the above-mentioned symbols embedded
+within them.
+
+An @<operator definition,erasing> may be erased by calling
+~@/<UNARY,NULL/argument to>~ or ~@/<BINARY,NULL/argument to>~ with a second argument which is ~NULL~
+or "" (a ~STRING~ of length zero).  For example, the
+binary meaning of the operator '\' (defined above)
+could be erased by:
+
+.examp
+\BINARY("\",NULL)
+.end
+
+.sec(Operator Precedence,precedence)
+.x precedence
+
+Every operator in PPL (whether built-in or user-defined)
+has an attribute called its !<precedence>, as we first saw
+in {"Section!" desk}.  In the absence of parentheses,
+the relative precedence of operators in an expression
+determines the order in which those operations are performed.
+An expression such as 32*3^4+51 is evaluated
+as 3(2*(3^4))+51 because '^' is of
+greater precedence than '*', which in turn is of greater precedence
+than '+'.
+
+The precedence of an operator is given by an integer in the
+range 1 to 32767, and may optionally be specified as the third
+argument in calls to the functions ~@/<UNARY,precedence/specification in>~ and ~@/<BINARY,precedence/specification in>~.
+If this argument is omitted, a new unary operator will be
+assigned @<precedence,default> equal to that of the built-in unary
+operators ('+' and '-'), whereas a new binary operator will be
+assigned a precedence lower than all existing operators except
+assignment ('_').  However, if the precedence is omitted
+while !<redefining> an !<existing> operator, the precedence
+will be inherited from the old definition.
+
+The following table gives the precedence of all of PPL's
+built-in operators:
+
+.begin nofill group indent 8 tabs 15
+.x precedence,table
+.xx plus operator,precedence,of
+.xx minus operator,precedence,of
+.xx arithmetic operator,precedence,of
+.xx power operator,precedence,of
+.xx multiplication operator,precedence,of
+.xx division operator,precedence,of
+.xx addition operator,precedence,of
+.xx subtraction operator,precedence,of
+.xx instance operator,precedence,of
+.xx comparison operator,precedence,of
+.xx equal operator,precedence,of
+.xx less than operator,precedence,of
+.xx less than or equal operator,precedence,of
+.xx greater than operator,precedence,of
+.xx greater than or equal operator,precedence,of
+.xx not equal operator,precedence,of
+.xx logical operator,precedence,of
+.xx and operator,precedence,of
+.xx or operator,precedence,of
+.xx assignment operator,precedence,of
+.xx noncopy assignment operator,precedence,of
+.xx goto operator,precedence,of
+
+100\+  -  (unary)
+90\^
+80\*  /
+70\+  -  (binary)
+60\==
+50\=  <  <=  >  >=  #
+40\&
+30\!
+20\_  __
+10\-->
+.end
+
+(The operator '__' will be presented in {"Section!" copshr}
+and '-->' in {"Section!" syntax}.)
+The default precedence for new unary operators is 100, and for
+new binary operators 25.  (These numbers are the values of
+built-in variables called ~<<DEF.UNARY.PREC>~ and ~<<DEF.BINARY.PREC>~,
+which may be assigned new values by the user who desires to
+change the defaults).
+
+Binary operators have another attribute called !<associativity>,
+which determines the order of evaluation of expressions
+containing operators of !<equal> precedence.  Most common
+operators are !<left associative>, meaning that the order
+of evaluation of expressions such as 3A+B+C+D1 is
+left to right, i.e. 3((A+B)+C)+D1.  However, in some
+cases, such as multiple assignment, it is desirable for the
+.xx assignment operator,associativity,of
+operations to be done from right to left;  e.g.
+3A_B_C_01 should be evaluated as 3A_(B_(C_0))1.
+Such operators we describe as !<right associative>.
+'^' is also a right associative operator since the
+.xx power operator,associativity,of
+conventional algebraic interpretation of expressions such as
+
+.begin nofill indent 8 turn on "^[]"
+
+ab^[c^d]  is  a(b^[(c^d)])  rather than  ((a^b)^c)^d.
+.end
+
+The &/<associativity/specification in/BINARY> of an operator is specified by supplying
+the ~@@<STRING,as associativity specification in BINARY> "LEFT"~ or ~"RIGHT"~ as the fourth argument to ~BINARY~ (PPL looks
+at only the first character).  Where this argument is not supplied,
+the &<default/associativity> for !<new> binary operators is left associativity
+and for !<existing> operators the associativity of the previous
+definition.
+(The default associativity actually used is the value of the
+built-in variable ~<<DEF.ASSOC>~, which is initially the string ~"LEFT"~.)
+
+An obscure case arises if a unary operator and a binary operator
+.x precedence conflict,resolution of
+with the same precedence, or two binary operators with
+the same precedence but opposite associativity,  are used in an expression.  For example,
+if we define
+
+.examp
+\BINARY("@",MANGLE,70,"RIGHT")
+.end
+
+then the order of evaluation of 3A@B+C1 is unclear because
+binary '+' also has a precedence of 70 but is left associative.  By convention, the associativity
+of the rightmost operator is used to resolve the conflict.
+3A@B+C1 is evaluated as 3(A@B)+C1 in this case, because
+'+' is a left associative operator.  Were '+' right associative,
+the expression would instead be evaluated as 3A@(B+C)1,
+regardless of the associativity of '~@~'.
+
+.sec(Built-In Functions Dealing with Operators,builtinopdef)
+
+PPL provides several built-in functions for obtaining information
+about defined operators.*<At present these functions are
+unimplemented in the PDP-11 version.>
+These are as follows:
+
+.begin indent 0,20 tabs 21
+{fn(UNARY.DEF,o)}\Returns as a ~STRING~ the name of the function
+associated with the unary operator !<o>, which is also given
+as a ~STRING~.  Hence 3UNARY.DEF("-")1 returns 3"MINUS"1.
+If !<o> is not defined as a unary operator, the result returned
+is "" (a ~STRING~ of length zero).
+
+{fn(BINARY.DEF,o)}\Returns as a ~STRING~ the name of the function
+associated with the binary operator !<o>.  Hence
+3BINARY.DEF("-")1 returns 3"SUB"1.  If !<o> is
+not defined as a binary operator, "" is returned.
+
+{fn(UNARY.PREC,o)}\Returns the unary precedence (an ~INT~eger)
+of the operator !<o>, or zero if !<o> is not defined as
+a unary operator.
+
+{fn(BINARY.PREC,o)}\Returns the binary precedence of the operator !<o>,
+or zero if !<o> is not defined as a binary operator.
+
+{fn(ASSOCIATIVITY,o)}\Returns the associativity of the binary operator
+!<o> as the ~STRING "LEFT"~ or ~"RIGHT"~, or "" if !<o> is not defined
+as a binary operator.
+
+~<<OPERATORS>~\(A parameterless procedure) Returns a list of all
+defined operators as a ~<<TUPLE>~ of ~STRING~s (~TUPLE~s will be
+presented in {"Section!" builtinddef}).
+.end
+
+The functions ~UNARY.PREC~ and ~BINARY.PREC~ are convenient to use
+when defining new operators.  For example, to define a new
+unary operator '*' with precedence just below that of the
+binary operator '+', we might say:
+
+.examp
+\UNARY("*", STAR, BINARY.PREC("+")-3)
+.end
+
+This avoids the necessity of consulting the precedence table
+given in the previous section.
+
+
+.sec(RENUMBER and Iversonian Precedence,iversonian)
+
+When the operator definition facility is used heavily, the
+situation may arise in which it is no longer possible
+to interpolate between the precedence of existing operators
+.xx precedence,interpolation,in scale of
+when assigning the precedence for a new operator.
+To alleviate this condition, the library function {fn(RENUMBER,n)}
+may be used.  This function changes the precedence of all
+defined operators in such a way that subsets of equal-precedence
+operators are separated in precedence by !<n>
+(which must be a positive integer).
+
+Previous versions of PPL did not include the operator precedence
+scheme described in the preceding section, but rather
+employed a much simpler convention called !<Iversonian precedence>.
+.x Iversonian precedence
+.x precedence,Iversonian
+In this scheme, all operators are of the same precedence and
+right-associative, as is the case in the language <<APL>.
+(This precedence scheme is named after %%<K.E./Iverson>,
+the designer of APL.)
+
+In order to provide compatibility with older PPL programs or
+to accomodate user preference for Iversonian precedence,
+there exists a parameterless procedure ~<<IVERSONIAN>~ which, when called,
+causes PPL to revert to Iversonian precedence conventions.
+Specifically, ~IVERSONIAN~ changes all existing operators to have the
+same precedence and right associativity, and changes the values
+of the variables ~DEF.UNARY.PREC~, ~DEF.BINARY.PREC~, and ~DEF.ASSOC~
+correspondingly so that further definitions also conform to Iversonian
+precedence.
+
+Complete @@<compatibility,with old PPL programs> with programs written prior to PPL-10 version 52
+may be obtained by executing the following statements !<before>
+reading in such programs:*<The order is important because operator precedence and associativity are applied at the time a function is defined, not when it is executed.>
+
+.examp
+\IVERSONIAN
+\BINARY("/",<<IDIV>)
+.end
+
+Neither ~RENUMBER~ or ~IVERSONIAN~ is defined as part of the basic
+system, but must be obtained from the system library, which may
+be different for the various installations at which PPL is supported.
+This information should be maintained in the local "news" file.
+
+.sec(Data Definitions,datadef)
+.see definition,data,data definition
+.x data definition
+
+Of the six data types already presented,
+five (~INT~, ~REAL~, ~DBL~, ~BOOL~, and ~CHAR~)
+are !<atomic>, meaning that they are the basic
+forms predefined within PPL and are indecomposable.
+A number of built-in operations may be performed on these types;
+most of these operations have already been presented.
+
+Being an extensible language, PPL contains
+the mechanisms required for defining and
+manipulating new types of data.  Once the user has
+defined a data type, he may write functions for
+manipulating instances of that type, and he may
+associate these functions with symbolic operators
+of his own choosing
+in the manner just presented.
+The result is that
+complicated programs involving
+lists, trees, and other such structures
+may be written simply.  Through the use of
+data and operator definitions, PPL may be extended to
+such a degree that simple expressions become quite
+powerful in their actions.
+
+.ssec(Structure Definitions,strdef)
+.x data definition,structure
+
+In PPL we may define three different
+classes of @<data type,user-defined>s.  First, we may have
+structures.  A !<structure> is a datum consisting
+of any number of named parts (possibly of different types).
+We will make use of the following example to
+explain the use of %<structure/definition>s:
+
+.examp
+\$<<COMPLEX> = [RP:REAL, IP:REAL]
+.end
+
+This is read: "A ~COMPLEX~ is defined to be a structure
+containing an ~RP~ of type ~REAL~ and an ~IP~ of
+type ~REAL~" (where ~RP~ is being used to
+stand for 'real part' and ~IP~ for 'imaginary part').
+Issuing this definition causes the following
+actions to be taken:
+
+First, a !<constructor> function ~COMPLEX~
+.see function,constructor,constructor function
+.xx structure,constructor function,for
+is created by PPL.  This is a function which
+takes as many arguments as there are
+elements in the data definition (i.e. two for ~COMPLEX~),
+and creates a datum of type ~COMPLEX~.  For example,
+
+.examp
+\X_COMPLEX(3.7, 59.0)
+.end
+
+assigns to ~X~ a value obtained by constructing
+a ~COMPLEX~ whose ~RP~ is 3.7 and whose ~IP~
+is 59.0.  The types of the arguments must
+agree with the types of the corresponding components
+in the data definition.
+
+Second, each identifier to the left of a colon
+.see function,selector,selector
+.x structure,selector for
+.x selector
+is defined to be a !<selector>.  A selector
+is a function that operates on a constructed
+datum and selects one of its components.
+In the definition of ~COMPLEX~ above,
+~RP~ and ~IP~ are defined as selectors.
+An example of the <<selection> operation is as follows:
+
+.examp
+\R_RP(X)
+\R
+3.7
+\13+IP(X)
+72.
+.end
+
+The selection operation may alternatively
+be denoted in !<subscript notation> by placing
+.xx selector,subscript notation,for
+the selector name within @@<square brackets,enclosing selector>
+immediately following the value from which
+the selection is being made, thus:
+
+.examp
+\X[RP]
+3.7
+\13+X[IP]
+72.
+.end
+
+Third and finally, the name of the
+data definition (~COMPLEX~) is also defined
+as a !<predicate>.
+A &/<predicate/for/structure> is an identifier which is the
+name of the given data type.
+This name may then be used in other
+data definitions and as arguments to certain
+functions and operations that take data types
+as arguments.
+One of these, which we glanced at in {"Section!" opdef},
+is the '==' operator.  It takes as its
+.x instance operator
+left operand a value, which it checks against the
+right operand which must be a predicate.
+If the value is an instance of the predicate, the
+'==' operator returns the value ~TRUE~; if not, the result
+is ~FALSE~.  For example, having constructed
+a ~COMPLEX~ and assigned it to the variable ~X~,
+we may execute the following statements:
+
+.examp
+\X==COMPLEX
+TRUE
+\3.427==COMPLEX
+FALSE
+.end
+
+At this point we should note that
+predicates also exist for the five atomic data types.
+These predicates, as one might expect, are named
+~@/<INT,predicate/>~, ~@/<REAL,predicate/>~, ~@/<DBL,predicate/>~,
+~@/<BOOL,predicate/>~, and ~@/<CHAR,predicate/>~.
+The following example will illustrate their use:
+
+.examp
+\3==INT
+TRUE
+\4.529==INT
+FALSE
+\V_93+45.2/6*3.5
+\V==REAL
+TRUE
+.end
+
+.ssec(Sequence Definitions,seqdef)
+
+The second type of data definition we may
+make is a !<sequence> definition.
+.x data definition,sequence
+A sequence is a datum consisting of any number
+of homogeneous, numbered parts.
+The indexing is done by some contiguous subset
+of the integers.
+
+As an example of a %<sequence/definition>, we
+will define:
+
+.examp
+\$<<ROW> = [1: ] REAL
+.end
+
+which is read:  "Define a ~ROW~ to be a sequence
+of ~REAL~s, indexed by integers starting
+at 1 and extending to an indefinite upper limit".
+
+As is the case for structures, issuing
+a sequence definition causes a &/<constructor function/for/sequence>
+to be created by PPL.  The constructor function
+~ROW~ will take any number of arguments of type ~REAL~
+and will construct a ~ROW~ out of them.
+For example,
+
+.examp
+\X_ROW(3.56, -28.59/2, 3*55.21/4)
+.end
+
+assigns to ~X~ a ~ROW~ consisting of three elements
+which are the values of the three arguments.
+
+Given a datum of type ~ROW~, we may select
+any one of its elements by means of !<indexed selection>
+.x selection
+.see index,subscript
+.xx sequence,selector,for
+or !<subscripting>.  When the value of ~X~ was constructed,
+the first element of the ~ROW~ was associated
+with the index 1, the second with the index 2, and the
+third with the index 3.  We select a component
+of ~X~ by placing the desired index
+(which must be an expression of type ~INT~) in square brackets
+after the name ~X~, thus:
+
+.examp
+\X[1]
+3.56
+\I_3
+\Q_X[I-1]
+\Q
+-14.295
+\(Q+X[I])/2
+13.55625
+.end
+
+Note that the indices start at the number
+specified on the left side of the colon
+in the sequence definition.  Thus, if we had defined
+~ROW~ as:
+
+.examp
+\$ROW = [-10: ] REAL
+.end
+
+then the three elements of ~X~ would be ~X[-10]~, ~X[-9]~,
+and ~X[-8]~.  Attempts to select nonexistent elements
+of a sequence will result in an execution error.
+
+Making a sequence definition also causes
+a &/<predicate/for/sequence> to be created, as is the case for 
+a structure definition.  We may test for
+occurrences of sequences in exactly the same way as for
+structures:
+
+.examp
+\X==ROW
+TRUE
+\X==COMPLEX
+FALSE
+.end
+
+We may also make sequence definitions with
+&/<fixed upper bound/for/sequence>s;  for example:
+
+.examp
+\$<<ROW4> = [1:4] INT
+.end
+
+defines ~ROW4~ to be a sequence of four components
+of type ~INT~, numbered 1, 2, 3, and 4.
+
+.ssec(Alternate Definitions,altdef)
+.x data definition,alternate
+.x definition,alternate
+.x alternate definition
+
+The third form of data definition we may make
+is an !<alternate> definition, which
+defines a new @@<predicate,defined by alternate definition> to be the !<union>
+of any number of other predicates.
+.see union of predicates,alternate definition
+For example:
+
+.examp
+\$<<ARITH> = INT ! REAL ! DBL
+.end
+
+defines an ~ARITH~ to be either an ~INT~, a ~REAL~,
+or a ~DBL~.  The names on the right side of the definition
+may be built-in predicates (e.g. ~INT~), user-defined
+predicates (e.g. ~COMPLEX~),
+or predicates defined in other alternate definitions.
+
+Predicates defined in alternate definitions
+are useful in a variety of ways.  The first is in
+explicit type checking:
+
+.examp
+\3.276*54 == ARITH
+TRUE
+\X_ROW(3.56, -28.59/2, 3*55.21/4)
+\X==ARITH
+FALSE
+\X[3]/X[2] == ARITH
+TRUE
+.end
+
+Thus, in the case of this definition of ~ARITH~,
+the expression
+
+.examp
+\X==ARITH
+.end
+
+is a more compact representation of the expression
+
+.examp
+\X==INT ! X==REAL ! X==DBL
+.end
+
+
+However, alternate types are much more powerful
+than this.  Consider the following definition:
+
+.examp
+\$<<VECTOR> = [1: ] ARITH
+.end
+
+Given such a definition, it is possible to construct
+~VECTOR~s consisting of any set of components
+which are defined as being of type ~ARITH~
+(i.e. ~INT~, ~REAL~, or ~DBL~).
+The following example illustrates the behavior of
+this kind of construction:
+
+.examp
+\X_VECTOR(3, 7.9, 1.54/7)
+\X[1]
+3
+.apart group
+\X[1]==INT
+TRUE
+\X[1]==REAL
+FALSE
+\X[1]==ARITH
+TRUE
+.apart group
+\X[3]==REAL
+TRUE
+\X[3]==ARITH
+TRUE
+.end
+
+As may be seen above, the arguments to a constructor
+defined in this way need not all be of the same type, so long
+as each one's type is an alternative of the predicate ~ARITH~.
+
+.sec(Built-In Data Definitions,builtinddef)
+
+There exist five %<built-in/predicate>s
+with the following properties:
+
+.begin indent 4,20 tabs 21
+~<<ATOMIC>~\The union of all atoms
+(~INT~, ~REAL~, ~DBL~, ~BOOL~, and ~CHAR~).
+
+~<<STRUCTURE>~\The union of all structures.
+
+~<<SEQUENCE>~\The union of all fixed sequences
+(i.e. those with upper bound specifications).
+
+~<<V.SEQUENCE>~\The union of all variadic sequences
+(i.e. those with no upper bound specifications).
+
+~<<GENERAL>~\The union of all data types in the entire
+system (both built-in and user-defined).
+.end
+
+There also exists the following
+built-in data definition:
+
+.examp
+\$@/<TUPLE,data definition/> = [1: ] GENERAL
+.end
+
+that is, a ~TUPLE~ is a sequence of any length
+containing any objects as its components.
+The usual data operations may be
+performed using this definition;
+for example:
+
+.examp
+\X_TUPLE(3,'Q,TUPLE(4.1,"ABCDE"))
+.end
+
+However, a more concise syntax is available
+for constructing ~TUPLE~s.  A ~TUPLE~
+is indicated by a list of zero or more
+values enclosed in @@<square brackets,enclosing TUPLE>.
+For example:
+
+.examp
+.tabs 9,40
+\X_[3,'Q,[4.1,"ABCDE"]]\7a TUPLE of length 3
+3\Y_[TRUE]\7a TUPLE of length 1
+3\Z_[]\7a TUPLE of length 0
+.end
+
+~TUPLE~s are very convenient in many applications,
+since they effectively allow the manipulation of structures
+of arbitrary length and arbitrary type components.
+However, this is achieved at some expense in
+internal storage and execution &/<efficiency/of/data definition>.  Thus, when
+this flexibility is not needed, it is preferable
+to utilize structures and sequences with fixed element type.
+For example, given the following definitions of ~ROW~ and
+~VECTOR~ (made in {"Section!" datadef})
+
+.examp
+\$<<ROW> = [1: ] REAL
+
+\$<<VECTOR> = [1: ] ARITH
+
+\$<<ARITH> = INT ! REAL ! DBL
+.end
+
+one should note that a ~VECTOR~ takes over twice as much
+space to store as a ~ROW~ of the same length,
+even if in a particular case the components are of identical type (e.g. ~REAL~).
+This is because, in the case of the ~VECTOR~, PPL must
+take into account the possibility that some of the elements
+might be ~INT~s or ~DBL~s, which take different
+amounts of storage from ~REAL~s.
+This uncertainty does not arise for the ~ROW~ because its
+elements may only be ~REAL~s.
+
+.sec(Printing User-Defined Values,printinguser)
+.xx user-defined data,printout,of
+
+When PPL is requested to print out the
+value of a user-defined datum, it does so in
+the following form:
+
+.examp
+\X_VECTOR(3, 7.9, 1.54/7)
+\X
+[3,7.9,.22]
+\COMPLEX(5.7, -32.4)
+[RP:5.7,IP:-32.4]
+.end
+
+In this representation, the square brackets
+delimit the extent of the datum in question.
+This is done because user-defined structures
+may be nested.  For example, a two-dimensional
+array might be defined, constructed, and displayed as follows:
+
+.examp
+\$<<ARRAY> = [1: ] <<VECTOR>
+
+\A_ARRAY(X,VECTOR(3,2,1))
+\A
+[[3,7.9,.22],[3,2,1]]
+\Q_1
+\A[Q+1]
+[3,2,1]
+.end
+
+.sec(More on Selection,selection)
+
+Selection is a much more general operation
+than the examples so far have shown.  First, a @/<selection expression,assignment/to>
+may appear on the left side of an assignment
+statement as well as on the right.
+Such an operation causes the value of the right-hand
+expression to be assigned as the selected component
+of the given left-hand value (of course, this is legal
+only if the right-hand expression is of the correct type).
+A few examples will illustrate this behavior.
+
+.examp
+\X
+[3,7.9,.22]
+\X[2]_88.54E-27
+\X
+[3,8.854E-26,.22]
+\X[2]
+8.854E-26
+.apart group
+\A
+[[3,7.9,.22],[3,2,1]]
+\A[1]_A[2]
+\A
+[[3,2,1],[3,2,1]]
+.end
+
+Second, we may perform !<multiple selection>
+.x multiple selection
+.x selection,multiple
+on compound structures whose elements are in turn
+compound structures themselves.  The following
+example illustrates two possible notations for
+doing this in the case of user-defined sequences:
+
+.examp
+.tabs 9,40
+\V1_VECTOR(11,12,13)
+\V2_VECTOR(21,22,23)
+\X_ARRAY(V1,V2,VECTOR(31,32,33))
+\X
+[[11,12,13],[21,22,23],[31,32,33]]
+.apart group
+\(X[1])[3]\7Select the third element of X[1]3
+13
+\X[1][3]\7Exactly equivalent to above3
+13
+\X[3][2]
+32
+\X[3,2]\7A more compact notation3
+32
+.end
+
+For compound data types consisting of
+structures, we have even more possibilities.
+Let us define a ~<<NUM>~ as either an ~<<ARITH>~ (that is,
+a ~REAL~, ~INT~, or ~DBL~) or a ~<<COMPLEX>~.
+Then we shall define a ~<<NUMSEQ>~
+as an arbitrary sequence of these types.
+
+.examp
+\$NUM = ARITH ! COMPLEX
+
+\$NUMSEQ = [1: ] NUM
+
+\X_NUMSEQ(3.42,COMPLEX(8.1,-33.0),-5)
+.apart group
+\X
+[3.42,[RP:8.1,IP:-33.],-5]
+\X[2][IP]
+-33.
+\X[2,IP]
+-33.
+.apart group
+\RP(X[2])
+8.1
+\X[2,RP]_23.7
+\X
+[3.42,[RP:23.7,IP:-33.],-5]
+.end
+
+For convenience in writing routines that operate on
+many different types of data, it is possible to
+perform indexed (numeric) selection on structures
+.xx structure,numeric selection,on
+as well as sequences, with the lower bound assumed to be one.
+For example, given the structure definition
+
+.examp
+\$COMPLEX = [RP:REAL, IP:REAL]
+.end
+
+then, if ~X~ is assigned a value of type ~COMPLEX~,
+its components ~X[RP]~ and ~X[IP]~ may equivalently
+be accessed as ~X[1]~ and ~X[2]~.
+
+It should be noted at this point that
+a ~@/<STRING,data definition/>~ is actually a compound data structure,
+for which a data definition is predeclared in PPL.
+This definition is:
+
+.examp
+\$STRING = [1: ] @@<CHAR,component of STRING>
+.end
+
+Thus, it is possible to access individual
+characters of a ~STRING~ by selection.
+
+.examp
+\"STRING CONSTANT"[6]
+G
+\X_"STRING"
+\X[4]_'U
+\X
+STRUNG
+\X==STRING
+TRUE
+\X[4]==STRING
+FALSE
+\X[4]==CHAR
+TRUE
+.end
+
+Note that a ~STRING~ is an exception to
+.xx STRING,printout,of
+PPL's usual printing convention.  Since a ~STRING~
+is a compound datum, it would normally
+be printed thus:
+
+.examp
+\"ABCDEFGH"
+[A,B,C,D,E,F,G,H]
+.end
+
+However, PPL treats a ~STRING~ as a special
+case and omits the compound structure notation.
+Among other things,
+this permits the common use of ~STRING~s for printing
+out messages to the user.
+
+.sec(Built-In Functions for User-Defined Data,builtinuser)
+
+PPL contains a number of built-in functions
+for manipulating user-defined data.  In some cases,
+these functions could be written as user-defined
+functions at considerable expense in space or time,
+but have been built in to make them more efficient.
+
+.begin indent 0,16 tabs 17
+{fn(LENGTH,a)}\where !<a> is any value, returns the
+number of components in !<a>
+as an ~INT~.  If !<a> is atomic, {fn(LENGTH,a)}
+is defined to be one.
+
+{fn(L.BOUND,a)}\where !<a> may be a sequence or structure,
+returns its lower bound as an ~INT~.
+For a sequence, this is the number given on the left
+side of the colon in the data definition; for
+a structure, it is always one.
+
+{fn(TYPE,a)}\Returns the data type of the argument !<a>
+as a ~STRING~.
+For example, if ~X~ is of type ~COMPLEX~, then the
+value of ~TYPE(X)~ is the ~STRING "COMPLEX"~.
+
+{fn(MAKE,t,n,e)}\Constructs a variadic sequence of
+type !<t> containing !<n> elements, each of whose
+initial values is !<e>.  Thus, !<t> must be the name
+of a variadic sequence (i.e. one with no upper bound
+specification) and !<e> be a value that may legally
+be a component of instances of type !<t>.
+Note that !<n> may be any arbitrary ~INT~-valued
+expression, thus allowing the length of the
+sequence to be determined at execution time.
+
+{fn(CONCAT,a,b)}\where !<a> and !<b> are variadic sequences
+of the same type, constructs a new variadic sequence
+consisting of the concatenation of !<a> and !<b>,
+with !<a> on the left and !<b> on the right.
+Thus, ~CONCAT("PDP","-10")~ is ~"PDP-10"~,
+and it is always true that
+
+.begin nofill indent 19 select 3
+LENGTH(CONCAT(!<a>,!<b>)) = LENGTH(!<a>)+LENGTH(!<b>)
+.end; once preface 0 continue
+Note (this is a common error) that it is !<not>
+legal to ~CONCAT~ a ~STRING~ and a ~CHAR~, for
+example, because a ~CHAR~ is not itself a sequence;
+rather, a ~STRING~ is a sequence of ~CHAR~s.
+There is a distinct difference in PPL between
+a ~CHAR~ and a ~STRING~ containing one character.
+.end
+
+.sec(Sample Application:  Formula Manipulation,formula)
+.x formula manipulation
+
+As a demonstration of the power of the
+operator and data definition facilities
+presented so far, we
+shall now give an example of formula
+manipulation in PPL.
+This should help tie together many of the features
+explained in previous sections of the manual,
+and shows how, through judicious choice of a few simple
+data and operator definitions, we may create
+a program with considerable power and elegance.
+
+The first thing we shall do is devise a set of
+data definitions to describe the data (formulas)
+that we are going to manipulate.
+There are two kinds of formulas that we may define,
+namely unary formulas and binary formulas.
+The following are %<unary/formula>s:
+
+.begin nofill tabs 9 select 3
+
+\-A     +(B-3)     -((A*B)/(-(C-D)))
+.end
+
+whereas these are %<binary/formula>s:
+
+.begin nofill tabs 9 select 3
+
+\X+3     (-Y)/(A+(B*C))     B*(C-D)
+.end
+
+Note that we distinguish the class of formula by
+whether its principal operator is unary or binary.
+
+Thus, a unary formula is a structure consisting of a unary
+operator and a single operand which may in turn be
+any kind of formula.  Similarly, a binary formula is
+a structure consisting of a left operand, a binary operator,
+and a right operand;  each operand may in turn be a formula.
+Below are some abbreviations we shall use in defining
+these structures to PPL (note that these are not
+PPL statements but rather notes to ourselves).
+
+.begin nofill tabs 9,17
+
+\~FORM~\means Formula,
+\~BF~\means Binary Formula,
+\~UF~\means Unary Formula,
+\~LO~\means Left Operand,
+\~RO~\means Right Operand, and
+\~OP~\means Operator.
+.end
+
+The required definitions are made to PPL as follows:
+
+.examp
+\$<<FORM> = <<UF> ! <<BF> ! <<ATOM>
+
+\$UF = [OP:CHAR, RO:FORM]
+
+\$BF = [LO:FORM, OP:CHAR, RO:FORM]
+
+\$ATOM = STRING ! CHAR ! REAL ! INT ! DBL
+.end
+
+Note that these data definitions are !<mutually recursive>;
+.xx data definition,recursion,in
+that is, a ~FORM~ is defined as any of three other
+data types, two of which (~UF~ and ~BF~) may contain
+~FORM~s.  Note also that, in the definition of ~FORM~,
+we referred to data types that had not yet been defined.
+This is permitted in PPL because data definitions
+are static and are not acted upon until it is necessary
+to use them for actual data operations (e.g. construction
+or selection).
+
+Having made these definitions, we are now
+in a position to construct formulas.
+We shall use ~CHAR~acters to represent operators,
+and ~CHAR~s or ~STRING~s to represent variable names.
+Constants of type ~INT~, ~REAL~, or ~DBL~ will also
+be permitted.  So, for example, we could create
+the formulas 3X+31 and 3-(X*(X+3))1 with the following
+PPL statements:
+
+.examp
+\F_BF('X, '+, 3)
+\G_UF('-, BF('X, '*, F))
+\F; G
+[LO:X,OP:+,RO:3]
+[OP:-,RO:[LO:X,OP:*,RO:[LO:X,OP:+,RO:3]]]
+.end
+
+Although the results are correct so far,
+there are two difficulties that are immediately apparent,
+namely the formulas are awkward to type in
+and the output is hard to read.  Before proceeding
+further with our formula manipulation example, we
+should attempt to rectify these conditions.
+
+We may use PPL's operator definition facility
+to good advantage here by redefining all the
+operators used in our formulas (namely the binary
+operators '+', '-', '*', '/', and the unary operators
+'+' and '-') so that they construct appropriate
+.x formula,construction using operators
+.x operator definition
+formulas when they are used.  For example, we
+want the PPL expression
+
+.examp
+\'X+3
+.end
+
+to generate a binary formula in the same manner
+as the statement
+
+.examp
+\BF('X,'+,3)
+.end
+
+so as to make typing formulas more natural
+for the user.  This may be done by
+defining formula operation functions
+(one for each operator), then associating them
+with the desired operators.
+
+.examp
+.tabs 9,35
+\$<<FADD>(A,B)\7%<formula/addition>3
+   [1]\FADD_BF(A,'+,B)
+   [2]\$
+
+.apart group
+\$<<FSUB>(A,B)\7%<formula/subtraction>3
+   [1]\FSUB_BF(A,'-,B)
+   [2]\$
+
+.apart group
+\$<<FMUL>(A,B)\7%<formula/multiplication>3
+   [1]\FMUL_BF(A,'*,B)
+   [2]\$
+
+.apart group
+\$<<FDIV>(A,B)\7%<formula/division>3
+   [1]\FDIV_BF(A,'/,B)
+   [2]\$
+
+.apart group
+\$<<FPLUS>(A)\7unary plus for formulas3
+   [1]\FPLUS_UF('+,A)
+   [2]\$
+
+.apart group
+\$<<FMINUS>(A)\7%<formula/negation>3
+   [1]\FMINUS_UF('-,A)
+   [2]\$
+
+.apart group
+\<<BINARY>("+",FADD); BINARY("-",FSUB)
+\BINARY("*",FMUL); BINARY("/",FDIV)
+\<<UNARY>("+",FPLUS); UNARY("-",FMINUS)
+.end
+
+Having done this, we may now type in formulas
+in a much more natural way; for example:
+
+.examp
+\'X+3
+[LO:X,OP:+,RO:3]
+\G_ -('X*F)
+\G
+[OP:-,RO:[LO:X,OP:*,RO:[LO:X,OP:+,RO:3]]]
+.end
+
+To avoid having to keep typing in the single quotes
+to enter the characters representing common variables
+such as ~A~ and ~X~, we may define variables of
+the same names to have these characters as values:
+
+.examp
+\A_'A; B_'B; C_'C; X_'X; Y_'Y; Z_'Z
+\A/B*(X+Y-Z)
+[LO:[LO:A,OP:/,RO:B],OP:*,RO:[LO:[LO:X,OP:+,RO:Y],OP:-,RO:Z]]
+.end
+
+Now that we have made formulas easy to type in, we
+would like to be able to read them more readily
+when they are printed out.  To do this, we shall write
+a simple function called ~PF~, which will
+print out a formula in more standard form.
+.xx formula,printout,of
+The required definition is as follows:
+
+.examp
+\$<<PRINT.FORM>(F)
+   [1]\IF F==ATOM THEN PRINT(F); RETURN
+   [2]\PRINT("("); IF F==BF THEN PRINT.FORM(F[LO])
+   [3]\PRINT(F[OP]); PRINT.FORM(F[RO]); PRINT(")")
+   [4]\$
+
+.apart group
+\$<<PF>(F)
+   [1]\PRINT.FORM(F); ""
+   [2]\$
+.end
+
+The ~PF~ function simply invokes the ~PRINT.FORM~
+function (which does not advance the line), then
+advances the line by directly printing a null ~STRING~.
+{fn(PRINT.FORM,f)} prints any datum !<f> of type ~FORM~;
+i.e. legal arguments may be ~UF~s, ~BF~s, ~INT~s,
+~REAL~s, ~DBL~s, ~CHAR~s, and ~STRING~s.
+This function prints a structure (~UF~ or ~BF~)
+by recursively calling itself for each of its components.
+For example:
+
+.examp
+\PF(F)
+(X+3)
+\PF(G)
+(-(X*(X+3)))
+\PF(A/B*(X+Y-Z))
+((A/B)*((X+Y)-Z))
+.end
+
+The result is clearly more readable.  To save a little
+more typing on the part of the user, we may associate
+a unary operator with the ~PF~ function, as follows:
+
+.examp
+\UNARY("@", PF, SUB(BINARY.PREC("+"),5))
+\@G
+(-(X*(X+3)))
+.end
+
+Now that we have a reasonable mechanism for
+input and output of formulas, we want to do something
+interesting with them.
+We shall define a function
+that performs differentiation on any formula
+.see differentiation,DERIV
+containing the operators '+', '-', '*', and '/'.
+The ~DERIV~ function takes two arguments; the first
+is the formula to be differentiated, and the second
+is the variable of differentiation 
+(represented by a ~CHAR~).
+The ~DERIV~ function computes derivatives by
+recursive applications of the following well-known
+identities:
+
+.begin nofill group tabs 9,28
+
+\(d/dx) constant =\0
+\(d/dx) x =\1
+\(d/dx)(a+b) =\da/dx + db/dx
+\(d/dx)(a-b) =\da/dx - db/dx
+\(d/dx)(a*b) =\a*db/dx + b*da/dx
+\(d/dx)(a/b) =\(b*da/dx - a*db/dx) / b{super(2)}
+.end
+
+These rules may be coded into PPL statements
+quite directly.  Note that ~DERIV~ is going
+to have to call itself recursively in many places.
+To reduce the amount of typing we must do while
+defining the function, we shall first associate
+a binary operator with the function so that we may
+use it to make recursive calls. (Recall the
+warning in {"Section!" opdef} about inadvertently making
+&/<recursive call/by/operator redefinition>s through operator definition; in this
+case we want to do exactly that).
+PPL allows the user to associate an operator
+with a function that has not yet been defined;
+it is only when we actually try to use the
+operator to perform its respective operation that
+the function must exist.
+
+.examp
+\BINARY("\", DERIV, ADD(BINARY.PREC("*"),5))
+
+.apart group
+\$<<DERIV>(F,X)
+   [1]\IF F==ATOM THEN IF F=X THEN RETURN 1 ELSE RETURN 0
+   [2]\IF F==UF THEN RETURN UF(F[OP],F[RO]\X)
+   [3]\IF NOT(F==BF) THEN "IMPROPER ARG TO DERIV"; RETURN
+   [4]\IF F[OP]='+ THEN RETURN F[LO]\X + F[RO]\X
+   [5]\IF F[OP]='- THEN RETURN F[LO]\X - F[RO]\X
+   [6]\IF F[OP]='* THEN RETURN F[LO]*F[RO]\X + F[RO]*F[LO]\X
+   [7]\IF F[OP]='/ THEN RETURN %
+\   (F[RO]*F[LO]\X - F[LO]*F[RO]\X) / (F[RO]*F[RO])
+   [8]\"IMPROPER OPERATOR IN BINARY FORMULA"
+   [9]\$
+.end
+
+We shall now test ~DERIV~ by using it to find the derivatives
+of the formulas ~F~ and ~G~, which have already been constructed.
+
+.examp
+\DERIV(F,X)
+[LO:1,OP:+,RO:0]
+\@F\X
+(1+0)
+\@G\X
+(-((X*(1+0))+((X+3)*1)))
+.end
+
+A further simplification of the results (e.g. to collapse
+formulas such as 3(1+0)1) could now be performed;
+however, we shall not present that here.
+
+.sec(Further Operator Extension,moreopdef)
+
+Given the ability to define new
+data types, it is desirable to be able
+to redefine common operators to perform
+operations on them.
+Some general
+guidelines should be followed when doing so.
+
+Usually what one wants to do is
+to extend an operator to manipulate user-defined
+types, yet to have the standard meaning retained
+in the case of atomic types.
+The required technique in writing a function to
+perform this kind of operation is to make
+type tests on the operands.  If they do not
+match the user-defined types in question, then
+the corresponding built-in function should be explicitly
+called on the same arguments.
+
+In the following example, we extend the
+addition operator to handle instances of type ~<<COMPLEX>~.
+
+.examp
+\$<<CADD>(A,B)
+   [1]\IF A==COMPLEX THEN %
+\   IF B==COMPLEX THEN RETURN %
+\\COMPLEX(ADD(A[RP],B[RP]),ADD(A[IP],B[IP])) %
+\   ELSE RETURN COMPLEX(ADD(A[RP],B),A[IP])
+   [2]\IF B==COMPLEX THEN RETURN COMPLEX(ADD(A,B[RP]),B[IP]) %
+\   ELSE RETURN ADD(A,B)
+   [3]\$
+
+.apart group
+\BINARY("+",CADD)
+\X_COMPLEX(8.37, -2.1)
+\Y_COMPLEX(-1.1427, 89.54)
+\X+Y
+[RP:7.2273,IP:87.44]
+\X+3
+[RP:11.37,IP:-2.1]
+\X+Y+1.47
+[RP:8.6973,IP:87.44]
+\42+7
+49
+.end

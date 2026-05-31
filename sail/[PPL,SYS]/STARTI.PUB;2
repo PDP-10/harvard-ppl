@@ -1,0 +1,1150 @@
+.chap(Getting Started with PPL,starting)
+.sec(Starting and Ending a Session with PPL,session)
+
+To use PPL, it is necessary first to establish contact
+with a computer system that offers it.  You must then
+identify yourself to the timesharing monitor (i.e. log in),
+and finally tell the system to start up PPL for you.
+
+The method for connecting your terminal to the computer varies
+from one computer installation to the next, and will not be
+presented here.  Login dialogues also vary, even between systems
+of the same type.  The following are typical dialogues for
+<<logging in> and <<starting PPL> under the DECsystem-10, Tenex, and
+Unix operating systems.  (Note:  In this manual, all actual typescript
+is in upper case.  Lower case text is used to make comments).
+Each user typein should be terminated by pressing carriage return.
+.see carriage return,Return
+.x Return key
+.see Newline,Return key
+
+Typical %/<login dialogue/for/DECsystem-10> (PDP-10):
+.examp
+.tabs 9,31
+3\.LOGIN\7Period typed by monitor.
+3\JOB 6 HARVARD 5.06A-18 TTY5
+\#123,4567\7Type your user number.
+3\PASSWORD:\7Type your password, which will
+\\  not print on the paper.
+3\1026    3-SEP-74    TUE
+
+3\.R PPL\7Tell monitor to start PPL.
+3\PPL H.52B(200) 15-JUN-741
+.end
+
+Typical %/<login dialogue/for/Tenex> (PDP-10):
+
+.examp
+.tabs 9,31
+\@LOGIN\7"@" typed by monitor.
+3\(USER) JONES\7Type your user name.
+3\(PASSWORD)\7Type your password.
+3\(ACCOUNT #) 123456\7Type your account number.
+3\JOB 31 ON TTY22 20-JUL-74 19:30
+\@PPL\7Tell the monitor to start PPL.
+3\PPL TX.52B(200) 15-JUN-74
+.end
+
+Typical %/<login dialogue/for/Unix> (PDP-11):
+
+.examp
+.tabs 9,31
+\;LOGIN: SMITH\7";LOGIN:" typed by monitor.
+3\PASSWORD:\7Type your password.
+3\&PPL\7Tell the Shell to start PPL.
+3\PPL HRSTS V.7(001) 10 SEP 76
+.end
+
+After typing out a title line identifying the
+version and date, PPL will indent the
+typehead eight spaces
+and stop.  This is PPL's signal that it is
+expecting a command from the user.
+
+When you are through using PPL, it is necessary to log out.
+The easiest way to do this from within PPL is simply to issue
+the command ~LOGOUT~ (followed by a carriage return).
+The system will momentarily type out a line or two summarizing
+the computer resources you have used, and you may then disconnect
+your terminal.
+
+.sec(Typing Commands to PPL,typing)
+
+Having logged in and started PPL,
+you may now type commands.
+However, PPL will not interpret
+or execute a command in any way until
+you signal you are finished by pressing
+the carriage return key, usually labelled Return or Newline
+(Return and Newline will be used interchangably in this manual).
+.x Return key
+If you make a mistake while typing a line
+to PPL, you can correct it before
+pressing Return by the use of
+special %<control/character>s that do %<text/editing>.
+PPL contains a large number of editing commands;
+however, we will explain only two of them here.
+.twocols(20,6,4)
+.x erasing,character
+.begin nofill
+<<Rubout>
+.flush right
+(@/<DECsystem-10,editing character/in>
+and @/<Unix,editing character/in>)
+.once flush left
+<<Control-A>
+(@/<Tenex,editing character/in>)
+.end
+.goright
+Pressing the Rubout key (sometimes labelled
+Del) causes the most recently typed-in character
+.see Del,Rubout
+to be erased.  The erased character is typed back
+or !<echoed> by PPL.  Further Rubouts will erase
+preceding characters on the line.
+.endcols
+
+.twocols(20,7,4)
+.x erasing,line
+.begin nofill
+<<Control-U>
+.flush right
+(DECsystem-10
+and Unix)
+.once flush left
+<<Control-Q>
+(Tenex)
+.end
+.goright
+To erase the entire line being typed in,
+press down the Control key
+(labelled Cont or Ctrl) and simultaneously type U
+(Q in Tenex).  PPL will
+ignore the line being typed in and prompt for a
+new command.  Another command
+may now be begun.
+.endcols
+
+There are two other control characters of interest
+to PPL users;  they may be typed in at any time.
+
+.begin indent 0,16 tabs 17
+<<Control-C>\When PPL is executing user commands
+or programs, striking Control-C twice in a row
+will cause PPL to stop doing so and to return control
+to the user for new commands.
+(A single Control-C is sufficient in @/<PPL-11,Control-C/handling in>.)  Hence, Control-C
+may be used as a sort of 'panic button'.
+.see panic button,Control-C
+!<Warning:>  If the use of Control-C results in
+the system's printing a period or at-sign at the left
+margin, you should immediately issue a ~REENTER~
+command to return control to PPL.  See {"Section!" suspension~
+for further information.
+
+.see suppressing typeout,Control-O
+<<Control-O>\Typing Control-O while PPL
+is typing out will cause the remainder of the
+!<typeout> to be suppressed, but without
+interrupting or in any way affecting
+the operation of PPL itself.
+.end
+
+.sec(Using PPL as a Desk Calculator,desk)
+
+Now that the preliminaries are out of the way, let us
+consider a very simple use of PPL.
+One of PPL's features is that it is
+conversational and interactive, meaning that
+any PPL command may be typed in for immediate
+execution.  To demonstrate this, we shall use PPL
+as a (rather fancy) <<desk calculator>.
+
+The value of a numerical expression may be obtained
+by simply typing it in and pressing Return.
+For example:
+
+.examp
+3\3+2
+5
+\25*(46+2)
+1200
+\3.14159*(2.5^2)
+19.634941
+.end
+
+It may be seen above that user typein always
+begins eight spaces from the left margin.  PPL
+typeout in response to a user command, however,
+always begins at the left margin.
+
+PPL recognizes
+the following &<arithmetic/operator> operations:
+
+.begin nofill group tabs 9
+
+\+  &<addition/operator>
+\-  &<subtraction/operator>
+\*  &<multiplication/operator>
+\/  &<division/operator>
+\^  raising to a &<power/operator>
+.see exponentiation,power operator
+.end
+
+Additionally, PPL provides two unary
+arithmetic operations:
+
+.begin nofill group tabs 9
+
+\+  unary &<plus/operator>
+\-  unary &<minus/operator>
+.end
+
+Left and right <<parentheses> may be used freely to
+indicate the order in which operations are to be performed.
+Expressions within parentheses are evaluated by PPL
+before expressions outside.
+
+.see order of evaluation,precedence
+.see evaluation order,precedence
+.see operator precedence,precedence
+.see binding strength,precedence
+In the absence of parentheses, PPL performs the operations
+in an expression in the following order:  first, scanning
+from right to left, all unary operations are performed;
+then, again scanning from right to left, all
+exponentiations ('^').  Then all multiplications and divisions
+are done, scanning from left to right;  and finally additions
+and subtractions are done, again from left to right.
+
+This operator <<precedence> arrangement is the conventional one,
+used in many programming languages, and is quite similar
+to the conventions used in standard algebraic notation.
+The following table illustrates (by insertion of parentheses)
+PPL's interpretation of a few simple expressions:
+
+.examp
+.indent 8 tabs 35
+2*3+4\(2*3)+4
+2+3*4\2+(3*4)
+2+3^4*5\2+((3^4)*5)
+2-3+4\(2-3)+4
+2^-3^4\2^((-3)^4)
+.end
+
+Another (but more technical) way of explaining PPL's precedence
+is to say that unary '+' and '-' are of greatest precedence
+.xx arithmetic operator,precedence,of
+.xx plus operator,precedence,of
+.xx minus operator,precedence,of
+(or tightest binding strength).  '^' is of lower precedence
+.xx power operator,precedence,of
+and is right-associative, meaning that multiple exponentiations
+group to the right (i.e. are executed in right to left order).
+.xx multiplication operator,precedence,of
+.xx division operator,precedence,of
+Of still lower precedence are '*' and '/', and of lowest precedence
+.xx addition operator,precedence,of
+.xx subtraction operator,precedence,of
+are binary '+' and '-', all of which are left-associative
+(i.e. operators of equal precedence are evaluated from left
+to right).
+
+As a note in passing, we should mention that PPL allows the
+user to change the precedence of operators he is using
+to suit his own preference or convenience, or to make all operators
+be of equal <<precedence> and <<associativity> for simplicity.
+All this will be presented in {"Section!" opdef~.
+
+.sec(Numbers in PPL,numbers)
+.x number
+
+.see integer,INT
+.see double-precision,DBL
+.see floating point,REAL
+Numbers entered in PPL may be integer,
+real, or double-precision real (hereafter referred
+to as ~@/<INT,data type/>~, ~@/<REAL,data type/>~,
+and ~@/<DBL,data type/>~).  An ~INT~ is a sequence
+of decimal digits not containing (or immediately
+preceded or followed by) a <<decimal point>.
+A ~REAL~ is a sequence of decimal digits
+either (a) containing, immediately preceded
+by, or immediately followed by a decimal
+point, or (b) immediately followed by the
+letter E, an optional sign, and
+a one or two digit decimal <<exponent>.
+
+A ~REAL~ can contain up to eight !<significant digits> in @/<PPL-10,precision of number/in>
+and seven <<significant digits> in @/<PPL-11,precision of number/in>.
+If a number is typed in with more than
+this number of significant digits, it will be a ~DBL~ instead of
+a ~REAL~; a ~DBL~ can hold up to sixteen
+significant digits.  (A number typed in with
+more than sixteen significant digits
+will be automatically rounded to
+sixteen digits.)
+If the letter D is used instead of E
+before the exponent, the number will always
+be of type ~DBL~ even if it contains less
+than eight significant digits.
+Note that %<leading and trailing/zero>es
+are not significant digits, but
+embedded zeroes are;  thus, the numbers
+
+.examp
+\306200000.     3.062     .00003062
+.end
+
+each contain four significant digits.
+
+.begin group
+Examples of ~INT~s:
+
+.examp
+\31    0    987654321    000130
+.end
+.apart group
+Examples of ~REAL~s:
+
+.examp
+\3.14159    .52    0.    1.347E28    52E-7
+.end
+.apart group
+Examples of ~DBL~s:
+
+.examp
+\1.4D0    9.327863415    83.5216D27    1D-10
+.end
+.end
+
+PPL arithmetic operations are an example of
+PPL's !<polymorphic> capabilities.  ~REAL~s, ~INT~s, and ~DBL~s
+may be freely mixed in arithmetic expressions;
+the necessary %<type/conversion>s are all handled automatically.
+When confronted with an arithmetic operation involving
+operands of different type, the !<weaker> operand is converted
+to the type of the !<stronger>, with strength
+defined on the scale ~INT<REAL<DBL~.
+Hence, if an ~INT~ and a ~REAL~ are added, the ~INT~ is first
+converted to a ~REAL~, then the addition takes place,
+and the result is a ~REAL~.
+
+In the case of division of an ~@/<INT,division/of>~ by another ~INT~,
+if the remainder from the division is nonzero, both operands
+are converted to ~REAL~s and the result is a ~REAL~.
+(Where an ~INTeger~ result is desired, with the remainder thrown away,
+the ~<<IDIV>~ function described in {"Section!" conversion~ should be used.)
+
+The following are a few examples of
+polymorphic arithmetic operations:
+
+.examp
+\3+4
+7
+\3+4.0
+7.
+\3+4.23376259
+7.23376259
+.apart group
+\16/2
+8
+\16.0/2
+8.
+\17/2
+8.5
+\2/17
+.1176471
+\2.0D0/17
+.117647058823529
+.end
+
+.sec(Variables,variables)
+
+Values in PPL may be assigned to !<variables>.
+A <<variable> is a named memory location into which
+we can place a value.
+The name of a variable is called an !<identifier>, which
+is a string of letters, digits, and/or periods,
+beginning with a letter, not ending with a period,
+and containing no two adjacent periods.
+The following are legal <<identifier>s:
+
+.examp
+\A    W3    TH1.3V    SUM.OF.9.DIGITS
+.end
+
+Upper and lower case letters may be used interchangeably
+in identifiers, and PPL does not distinguish between them.
+
+Assignment is performed by the '_' @<operator,assignment>
+(left-arrow on most terminals, but underline on some).
+The left operand must be a @/<variable,assignment/to> name (identifier),
+and the right operand a value of some sort.
+Once so defined, variables may be used in PPL expressions
+exactly like numbers or other expressions.
+
+.examp
+\N_5.4
+\N
+5.4
+\Q3_N^2+54
+\Q3/7
+30.20914
+\N_N-2.1
+\N
+3.3
+.end
+
+(It is customary to pronounce the expression 3N_5.41
+as '~N~#gets#~5.4~').
+
+As the last example above indicates,
+it is quite legal to assign a new value to
+an already-defined variable.  The new value
+replaces the old contents of the memory
+location named by the identifier;
+this value
+need not be of the same type as the old.
+In PPL's polymorphic handling of data,
+!<type> is an attribute, not of !<variables>,
+but rather of !<values>.  A variable is
+capable of holding !<any> type of quantity;
+what might be considered to be the variable's
+&/<type/of/variable> is actually the %/<type/of/value> stored
+in it at any given time.  Thus, variable type
+declarations, required in many programming languages,
+are completely unnecessary in PPL.
+Further examples of assignment:
+
+.examp
+\N_3
+\(N+1)/2
+2
+\N_3.35E+8
+\(N+1)/2
+1.675E+08
+\PI_3.14159
+\PI*N^2
+3.525649E+17
+.end
+
+.sec(Other Built-in Data Types,builtintypes)
+
+Besides the types ~INT~, ~REAL~, and ~DBL~
+already presented, PPL has several other built-in
+data types, three of which are as follows:
+
+.see Boolean,BOOL
+A Boolean datum (~@/<BOOL,data type/>~) has as its value
+either ~<<TRUE>~ or ~<<FALSE>~.
+Values of type ~BOOL~ are generated by logical and
+comparison operations (see below).  For convenience,
+the identifiers ~TRUE~ and ~FALSE~ are initially
+defined as variables containing these values.
+
+A @/<character,data type/> (~@/<CHAR,data type/>~) is a datum consisting of
+a single 7<<ASCII>* character.*<ASCII stands for American Standard Code
+for Information Interchange, and is simply a
+particular convention for encoding characters
+into binary numbers.  {"Appendix!" appascii~ lists the correspondence
+between characters and numeric codes.>  A constant of type
+~CHAR~ is typed in as a %<single/quote> followed
+by the desired character.
+For example:
+
+.examp
+\C_'Q
+\C
+Q
+.end
+
+A ~@/<STRING,data type/>~ is an arbitrary-length sequence
+of 7ASCII* characters.  To type in a string, surround
+it with %<double/quote>s.  If it is desired to include
+a double quote within a string, it should be entered
+by typing two adjacent double quotes.
+
+.examp
+\"I AM A CHARACTER STRING"
+I AM A CHARACTER STRING
+\QQ_"HE SAID ""FOO""."
+\QQ
+HE SAID "FOO".
+.end
+
+PPL has a number of built-in
+operators for generating and manipulating data of type ~BOOL~.
+These may be divided into two groups:
+{italic(%<comparison/operator>s)~ and {italic(%<logical/operator>s)~.
+
+Comparison operators operate on
+two arithmetic (~INT~, ~REAL~, or ~DBL~) quantities
+and produce a result which is a ~BOOL~.
+In the table below, the result is ~TRUE~ if the
+condition holds, otherwise it is ~FALSE~.
+
+.begin nofill group tabs 9,21
+
+\!<a> = !<b>\!<a> &<equal/operator> to !<b>
+\!<a> < !<b>\!<a> &<less than/operator> !<b>
+\!<a> <= !<b>\!<a> &<less than or equal/operator> to !<b>
+\!<a> > !<b>\!<a> &<greater than/operator> !<b>
+\!<a> >= !<b>\!<a> &<greater than or equal/operator> to !<b>
+\!<a> # !<b>\!<a> &<not equal/operator> to !<b>
+.end
+
+The relational operators '<', '<=', '>' and '>=' have been
+extended in the PDP-11 version to take ~STRING~s as their
+two arguments.
+The Boolean value produced is based on the lexographic
+ordering of the ~STRING~s, based on their 7ASCII* code.
+
+Logical operators operate on
+values of type ~BOOL~ and produce a result of the
+same type.  The result is ~TRUE~ if the condition
+below holds, otherwise ~FALSE~:
+
+.begin indent 8,20 tabs 21 group
+!<a> & !<b>\The '&<and/operator>' operation - !<a> and !<b> both ~TRUE~.
+
+!<a> ! !<b>\The 'inclusive &<or/operator>' operation - either !<a> or !<b> (or both) ~TRUE~.
+
+- !<a>\The '&<not/operator>' operation - !<a> not ~TRUE~.
+.end
+
+Note that the meaning of the '-' operator
+depends on its operand.
+When it operates on a datum of type
+~INT~, ~REAL~, or ~DBL~, it indicates &<negation/operator>,
+whereas when it operates on a ~BOOL~ it indicates
+logical &<complementation/operator>.
+
+The comparison operators are of lower &/<precedence/of/comparison operator> than any of
+the arithmetic operators;  that is, in the absence of parentheses,
+arithmetic operations ('+', '/', etc.) are performed before
+comparisons ('=', '<', etc.)  The @/<logical operator,precedence/of>s ('&' and '!')
+are in turn of lower precedence than the comparison operators.
+Finally, the @/<assignment operator,precedence/of> ('_') has the lowest precedence
+of all operators mentioned so far.
+
+The following table summarizes the relative precedence and
+other attributes of all operators presented so far.
+The operators are listed in order of decreasing precedence,
+with operators of equal precedence relative to each other listed
+on the same line.  All binary operators except '^'
+and '_' are left-associative (group to the left).
+
+.begin nofill group indent 8 tabs 25
+.x precedence,table
+.x associativity
+
++  -\(unary)
+^\(right-associative)
+*  /
++  -\(binary)
+=  <  <=  >  >=  #
+&
+!
+_\(right-associative)
+.end
+
+.sec(Function Calls,functioncalls)
+
+All operations examined thus far
+have been expressed through the use of
+binary and unary operators such as '+' and '-'.
+Each operator invokes a procedure that operates
+on one or two operands or arguments, and returns
+a single result which may itself be used as an
+operand within a larger expression.
+PPL also has a more general %<function/call>ing
+mechanism capable of invoking procedures that
+take any number of arguments (or none at all);
+indeed, it turns out that unary and binary
+operations are handled by PPL as special
+cases of function calls.
+
+An explicit function call is made by
+typing the name of the &<function/name> (an <<identifier>) followed by a
+list of @<argument,function>s contained within a pair
+of @@<parentheses,delimiting function arguments>.  If there is more than one
+argument, the arguments are separated by @@<comma,separating function arguments>s.
+If the function takes no arguments, the parentheses
+.x parameterless procedure
+.x procedure,parameterless
+may be omitted except in certain cases where
+a pair of parentheses with nothing between them
+is necessary to relieve ambiguity between
+the name of a function and the value obtained by
+calling it.
+
+As an example, consider the system function
+~<<ADD>~, which is implicitly invoked by the
+binary operator '+' but which may also be
+.x addition operator
+called explicitly:
+
+.examp
+\ADD(53,27)
+80
+\3.4+(ADD(ADD(1,5),7)-8.5)
+7.9
+.end
+
+
+All the built-in operations so far presented are
+similarly associated with internal functions
+accessible by using the proper identifier,
+according to the following table:
+.begin group nofill tabs 9,21
+.x addition operator
+.x subtraction operator
+.x multiplication operator
+.x division operator
+.x power operator
+.x plus operator
+.x minus operator
+.x equal operator
+.x less than operator
+.x less than or equal operator
+.x greater than operator
+.x greater than or equal operator
+.x not equal operator
+.x and operator
+.x or operator
+.x assignment operator
+
+\!<a> + !<b>\{fn(ADD,a,b)~
+\!<a> - !<b>\{fn(SUB,a,b)~
+\!<a> * !<b>\{fn(MUL,a,b)~
+\!<a> / !<b>\{fn(DIV,a,b)~
+\!<a> ^ !<b>\{fn(POWER,a,b)~
+\+ !<a>\{fn(PLUS,a)~
+\- !<a>\{fn(MINUS,a)~
+\!<a> = !<b>\{fn(EQ,a,b)~
+\!<a> < !<b>\{fn(LESS,a,b)~
+\!<a> <= !<b>\{fn(LESSEQ,a,b)~
+\!<a> > !<b>\{fn(GR,a,b)~
+\!<a> >= !<b>\{fn(GREQ,a,b)~
+\!<a> # !<b>\{fn(NOTEQ,a,b)~
+\!<a> & !<b>\{fn(AND,a,b)~
+\!<a> ! !<b>\{fn(OR,a,b)~
+\!<a> _ !<b>\{fn(ASSIGN,a,b)~
+.end
+
+Note that the assignment operation is
+performed by a system function;  that is,
+the statement
+
+.examp
+\ASSIGN(Q,3)
+.end
+
+is exactly the same as the statement
+
+.examp
+\Q_3
+.end
+
+Though the primary
+operation of this function (the assignment)
+is done internally, the function does in
+fact return a &/<value/of/assignment operator> which is the value assigned.
+Thus, assignments may be embedded within expressions.
+
+.examp
+\MINUS(3.1+(I_9.7)/2)
+-7.95
+\I
+9.7
+\A_B_C_1.0
+\B
+1.
+.end
+
+The user might wonder at this point
+what prevents the %<automatic/printout> of
+the value returned by the system function
+~ASSIGN~ in a normal assignment
+expression such as 3X_31.  PPL treats
+this case specially, according to the following rule:
+if the final operation performed in a statement
+is an assignment, printout is suppressed.  The
+same occurs if the final operation is a call to a
+%<null-value-returning/function>
+(several such functions exist and will be presented later).
+
+In addition, there are a number of
+%<built-in/function>s not associated with
+operators.  These must be explicitly called
+when they are needed.  As an example, two
+such built-in functions are:
+
+.begin indent 4,16 tabs 17
+.x type conversion
+.x INT,function
+{fn(INT,a)~:\For !<a> a ~REAL~ or ~DBL~, has
+as its value the result of converting
+!<a> to an ~INT~; i.e. by removing its
+fractional part.
+
+{fn(SQRT,a)~:\Computes and returns the <<square root> of !<a>,
+where !<a> is an ~INT~, ~REAL~, or ~DBL~.
+.end
+
+A complete list of PPL's built-in functions
+is given in {"Appendix!" appbuiltin~.
+
+.sec(Multiple Expressions,mulexp)
+.x multiple expression
+.x expression,multiple
+
+In all examples up to now, we have submitted
+single expressions to PPL for immediate execution,
+one expression per line.
+PPL also allows the user to type several expressions
+on a single line, separated by @@<semicolon,separating multiple expressions>s.
+When the line is terminated by the <<Return key>,
+PPL will then execute the expressions in left-to-right
+order.  For example, we might compute the
+hypotenuse of a right triangle with sides of length 3 and
+4 as follows:
+
+.examp
+\A_3; B_4; SQRT(A^2 + B^2)
+5.
+.end
+
+PPL's %%<automatic/printout> of the value of an expression
+.xx multiple expression,automatic printout,of
+is performed on the same basis for each expression
+in a multiple statement as it is for a statement
+consisting of a single expression.
+That is, expressions which are not assignments
+.x assignment operator
+or calls to %<null-value-returning/function>s
+will have their values printed out automatically
+by PPL, each on a separate line.
+For example, we could list out some values as follows:
+
+.examp
+\A; B; A+B; A-B; A^B
+3
+4
+7
+-1
+81
+.end
+
+.sec(FOR Forms,forforms)
+.x FOR form
+.see iteration,|FOR, REPEAT, WHILE|
+
+Often when we are using a computer, we want to
+do a certain operation, not just once, but
+for a sequence or range of values.
+For example, suppose we wanted to compute
+the sum of all the integers from 1 to 1000,
+and we didn't know the formula for it.
+Of course (with one technical difficulty) we could
+ask PPL to evaluate the expression 31+2+3+4+#...#+999+10001,
+but this would take a lot of typing.
+(The technical difficulty is that PPL
+is unable to process a statement that long).
+What we really want to do is:
+
+(1) Set some %/<variable/of/accumulation> (call it ~SUM~) to zero;
+
+(2) For each of the integers 1 through 1000,
+add that integer to the current value of ~SUM~
+and assign the result as the new value of ~SUM~; and
+
+(3) When we are done, print out the value of ~SUM~.
+
+PPL contains a mechanism for automating the execution
+of step (2) above; this mechanism is called the !<FOR form>.
+We shall introduce it by example.
+
+.examp
+\SUM_0
+\FOR I _ 1:1:1000 <<DO> SUM_SUM+I
+\SUM
+500500
+.end
+
+The second statement may be read as: 'for ~I~
+gets 1 by steps of 1 to 1000
+do 3SUM_SUM+I1'.
+
+To evaluate this statement, PPL takes the following
+actions.  First, it initializes ~I~ to the !<initial value> of one.
+.xx FOR form,initial value,of
+~I~ is called the 2%<controlled/variable>1 or
+.x FOR form,controlled variable
+2%/<variable/of/iteration>1.  Second, it checks to see whether
+~I~ has already exceeded the !<final> value
+.xx FOR form,final value,of
+1000.
+If it has, the remainder of the statement is not executed
+at all.  However, in this case, since ~I~ is less than 1000,
+the expression 3SUM_SUM+I1 is executed.
+Third, the !<step value> (one) is added to the controlled
+.xx FOR form,step value,of
+variable.  PPL then goes back and compares
+~I~ to 1000 again, once more executing 3SUM_SUM+I1
+if the final value has not been exceeded.
+This process is repeated until, at some test, the controlled
+variable !<exceeds> the final value, at which time the
+statement is finished.
+
+The general construction of the ~FOR~ form is as follows:
+
+.examp
+\FOR !<v> _ !<i> : !<s> : !<f> DO !<e>
+.x colon,separating FOR control elements
+.end
+
+where !<v> is the controlled variable, !<i>, !<s>, and !<f>
+are ~INT~, ~REAL~, or ~DBL~-valued expressions*<It is customary to use only INT-valued expressions
+as FOR-control elements so as to avoid possible anomalies
+arising from roundoff error and inexact internal representation
+of REALs and DBLs.> for,
+.x roundoff error
+.x error,roundoff
+respectively, the initial, step, and final values
+defining the sequence of numbers to be assigned to !<v>,
+and !<e> is an expression (or set of expressions separated
+by semicolons) to be executed once for each value of !<v>.
+
+There are two useful variations of the ~FOR~ form.
+First, if the step expression !<s> is omitted
+(along with the colon that follows it), its value is assumed
+to be one.  Second, if the step value !<s> is negative
+rather than positive, the counting is backwards and
+the comparisons between the values of !<v> and !<f> are
+reversed; i.e. the expression !<e> is executed repeatedly until
+!<v> is less than !<f>.  The following examples illustrate
+counting forward and backward.  Note the use of the
+built-in function ~<<PRINT>~, which takes any number of
+arguments and prints their values in left-to-right order,
+all on the same line (i.e. with no <<line advance> between them).
+
+.examp
+\FOR I _ 1:10 DO PRINT(I," ")
+1 2 3 4 5 6 7 8 9 10
+\FOR I _ 5:-2:-6 DO PRINT(I," ")
+5 3 1 -1 -3 -5
+.end
+
+The alert user who actually tries these examples will notice
+that the paper is not advanced to the next line after the
+results have been printed.  This is because ~PRINT~ does
+not cause a line advance when it is finished.
+For now, the user may manually advance to the next line
+simply by pressing Return (which actually
+.x Return key
+instructs PPL to execute a <<null statement> --
+more on that later).
+
+In place of the expression !<e> we may, as has already
+been mentioned, substitute a <<multiple expression>.
+We may also substitute another ~FOR~ form.
+However, when considering nested ~FOR~ forms,
+there arises the problem of determining the !<scope>
+.xx FOR form,scope,of
+of each ~FOR~, i.e. what piece of text is
+repeatedly executed by PPL at the inner and outer
+levels.
+The answer is that the scope of a ~FOR~ form
+is the rest of the statement, unless otherwise
+delimited by the user.  Parentheses may be
+used to alter this convention where necessary.
+To be more precise, a ~FOR~ scope extends
+to the end of the statement or to the next !<non-nested>
+occurrence of one of the following special symbols:
+
+.examp
+\)  ]  ,  ::  <<ELSE>  <<UNTIL>
+.end
+
+For example, suppose we wanted to print out a small
+multiplication table for all the products up to
+8 times 8.  We might first try the following
+statement:
+
+.examp
+\FOR I_1:8 DO FOR J_1:8 DO PRINT(I*J," ")
+1 2 3 4 5 6 7 8 2 4 6 8 10 12 14 16 3 6 9 12 15 18 21 24 4 8
+ 12 16 20 24 28 32 5 10 15 20 ^O
+.end
+
+Seeing that the result was not quite what we wanted,
+we typed <<Control-O> to suppress the rest of the
+typeout.  The problem is that the line is not being
+advanced after each row of numbers.  What we want to
+do is as follows:  For each value of ~I~,
+after stepping ~J~ through the range from 1 to 8
+and consequently printing out a row, we want to advance the line.
+
+In our next try at printing a multiplication table,
+we request PPL to print out the value of "" (a ~@@<STRING,zero length>~
+of length zero) after
+each repetition of the outer ~FOR~ form (note that PPL
+automatically prints the value of the body of a ~FOR~ form
+.xx FOR form,automatic printout,of body of
+on the same basis as it does a simple or multiple expression).
+Since PPL advances the line after any use of the "automatic print"
+feature, this has the desired effect.
+Notice also that we use @/<parentheses,limiting scope of FOR/with> to limit the scope
+.x FOR form,limiting scope
+of the innermost ~FOR~ (the one using ~J~ as its controlled
+variable).  This is because we want to advance the line only
+once for each ~I~;  leaving out the parentheses would cause
+the line advance to be done once for each ~J~.
+
+.examp
+\FOR I_1:8 DO (FOR J_1:8 DO PRINT(I*J," ")); ""
+1 2 3 4 5 6 7 8
+2 4 6 8 10 12 14 16
+3 6 9 12 15 18 21 24
+4 8 12 16 20 24 28 32
+5 10 15 20 25 30 35 40
+6 12 18 24 30 36 42 48
+7 14 21 28 35 42 49 56
+8 16 24 32 40 48 56 64
+.end
+
+Except for a minor &/<alignment/of/numeric output> problem, this is
+essentially what we want.  For now, we can align
+the columns by tabulating.
+Teletype terminals have tab stops set every eight
+characters (if they don't, the timesharing monitor
+simulates them).  Outputting a <<Tab> character
+to the terminal causes it to advance to the next
+tab stop.  A Tab character is usually entered
+as Control-I, except for certain terminals that
+have a separate Tab key.
+We shall now repeat the same statement, but with
+a Tab substituted for the space in the
+~STRING~ (in the expression 3PRINT(I*J,"#")1).
+
+.examp
+.tabs 9,17,25,33,41,49,57
+\FOR I_1:8 DO (FOR J_1:8 DO PRINT(I*J,"\")); ""
+1\2\3\4\5\6\7\8
+2\4\6\8\10\12\14\16
+3\6\9\12\15\18\21\24
+4\8\12\16\20\24\32\40
+5\10\15\20\25\30\35\40
+6\12\18\24\30\36\42\48
+7\14\21\28\35\42\48\56
+8\16\24\32\40\48\56\64
+.end
+
+A better mechanism for aligning numeric output
+will be presented in {"Section!" morenumbers~.
+
+.sec(|IF Forms (Conditionals)|,ifforms)
+.see conditional,IF form
+.x IF form
+
+The next interesting mechanism to be considered
+is called the !<IF form> or !<conditional>,
+which allows the value of an arbitrary ~<<BOOL>~ean expression
+to determine whether or not another expression will be
+executed at all.  For example:
+
+.examp
+\X_3
+\IF X=3 THEN "THIS WAS EXECUTED"
+THIS WAS EXECUTED
+\IF X>4 THEN "THIS WAS EXECUTED"
+\IF X>4 THEN Y_X+5 ELSE Y_-99
+\Y
+-99
+.end
+
+In each example above, PPL first evaluates
+the expression following the word ~IF~;  this expression
+is expected to be of type ~BOOL~ (i.e.
+its value must be ~TRUE~ or ~FALSE~).
+If the result is ~TRUE~, then the (possibly multiple)
+.x multiple expression
+expression after the word ~<<THEN>~ is executed.
+However, if the result is ~FALSE~, the ~THEN~ expression
+is not evaluated at all, but rather the expression after
+the word ~<<ELSE>~ is evaluated if there is one.
+
+The ~IF~ form generalizes into the following two cases:
+
+.begin nofill group tabs 9,17
+
+\1)\3IF !<b> THEN !<e>1
+\2)\3IF !<b> THEN !<e>{sub(1)~ ELSE !<e>{sub(2)~1
+.end
+
+where !<b> is an arbitrary expression which, when
+evaluated, computes a value which is a ~BOOL~,
+and where !<e>, !<e>{sub(1)~, and !<e>{sub(2)~ are arbitrary expressions
+(or multiple expressions).
+In case (1) above, !<e> is executed if and only if !<b> is ~TRUE~.
+In statement (2), !<e>{sub(1)~ is executed if !<b> is ~TRUE~,
+whereas !<e>{sub(2)~ is executed if !<b> is ~FALSE~.
+
+Suppose we were given the following problem:
+Find the integer between 1 and 100 whose sine is
+.see sine,SIN
+the largest.  PPL has a built-in function
+called ~<<SIN>~ which  returns the sine of any angle
+expressed in radians.
+(This angle may be expressed as an ~INT~, a ~REAL~,
+or a ~DBL~; the answer returned is always of type ~REAL~).
+For example:
+
+.examp
+\SIN(1)
+.841471
+\PI_3.14159265
+\SIN(PI)
+0.
+\SIN(PI/2)
+1.
+.end
+
+The given problem may be solved by use of the
+following strategy:
+
+(1) Choose some variable (call it ~MAX~) which
+is to be the maximum value of the sine encountered so far.
+Initially set it to -2, which is less than the lowest
+possible value for the sine function
+({fn(SIN,x)~ ranges from -1. to 1.).
+
+(2) For each of the integers from one to 100, take its
+sine.  If the result is greater than ~MAX~
+(i.e. greater than the largest value
+previously encountered), then remember the
+current integer for which that was true
+by assigning it to the variable ~N~;
+also assign the sine of this integer to ~MAX~,
+thus continuing to remember the highest value of
+the sine encountered so far.
+
+This algorithm may be presented to PPL
+in two direct statements, one of them
+involving the ~IF~ form just presented
+and the ~FOR~ form explained in {"Section!" forforms~.
+
+.examp
+\MAX_-2
+\FOR I_1:100 DO IF SIN(I)>MAX THEN N_I; MAX_SIN(I)
+\MAX
+.9999119
+\N
+33
+\SIN(33)
+.9999119
+.end
+
+The &/<scope/of/IF form> of an ~IF~ form is determined exactly the same way
+as in a ~FOR~ form; that is, the scope of the ~THEN~ part
+or the ~ELSE~ part extends to the end of the statement or
+to the next non-nested occurrence of one of the following
+special symbols:
+
+.examp
+\)  ]  ,  ::  <<ELSE>  <<UNTIL>
+.end
+
+Thus, in the example just presented, the ~THEN~ affects
+the two expressions 3N_I1 and 3MAX_SIN(I)1.
+The scope of the ~FOR~ form is the entire ~IF~ form.
+
+.sec(WHILE and REPEAT Forms,whilerepeat)
+.x WHILE form
+.x REPEAT form
+
+In some situations, it is necessary to perform !<iterative>
+(repetitive) operations in which the number of repetitions
+is not known in advance.  PPL provides a convenient notation
+for describing such operations, called the ~WHILE~ and ~REPEAT~ forms.
+
+The general construction
+
+.examp
+\WHILE !<b> <<DO> !<e>
+.end
+
+indicates that !<while> the ~BOOL~ean expression !<b> remains ~TRUE~,
+the expression (or <<multiple expression>) !<e> is to be repeatedly
+executed.  Similarly,
+
+.examp
+\REPEAT !<e> <<UNTIL> !<b>
+.end
+
+specifies that !<e> be executed repeatedly !<until> the
+~BOOL~ean condition !<b> becomes ~TRUE~.
+Note that ~WHILE~ and ~REPEAT~ differ in that !<b> is tested !<before>
+the first execution of !<e> in the ~WHILE~ form, but !<after> the
+first execution of !<e> in the ~REPEAT~ form.  Hence in the former
+case, it is possible that !<e> will not be executed at all if
+!<b> is initially ~FALSE~.
+
+It is of course expected
+in both cases that !<b> and !<e> are in some way related,
+in the sense that something in the computation of !<e> will
+eventually cause the value of !<b> to change.  Otherwise
+PPL will execute the ~WHILE~ or ~REPEAT~ form forever.  (Of course,
+if this occurs, <<Control-C> ({"Section!" typing~) may be used
+to stop PPL.)
+
+Our next example illustrates the use of the ~WHILE~ form to
+good advantage.  The problem is to print out the values of
+all the <<Fibonacci number>s less than 10000.  The Fibonacci numbers
+are a sequence of integers defined as follows:  Each number
+is the sum of the previous two numbers in the sequence,
+where the first two numbers are zero and one.  Thus, the first
+few numbers are 0, 1, 1, 2, 3, 5, 8, 13, 21, etc.
+Printing out the Fibonacci numbers less than 10000 is accomplished
+by keeping track of the current and next succeeding Fibonacci numbers
+in variables called ~A~ and ~B~, then repeatedly computing new
+Fibonacci numbers and printing them out while ~A~ remains less
+than 10000:
+
+.examp
+\A_0; B_1
+\WHILE A<10000 DO A; NEW_A+B; A_B; B_NEW
+0
+1
+1
+2
+3
+5
+.apart
+8
+13
+21
+34
+55
+89
+144
+233
+377
+610
+987
+1597
+.group
+2584
+4181
+6765
+.end
+
+We might alternatively use the ~REPEAT~ form to obtain the same results:
+
+.examp
+\A_0; B_1
+\REPEAT A; NEW_A+B; A_B; B_NEW UNTIL A>=10000
+.end
+                                                                                                                                                                                                                                                                                                                                                                                                                             

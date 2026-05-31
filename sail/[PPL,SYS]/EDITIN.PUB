@@ -1,0 +1,693 @@
+.chap(|Errors, Suspension, and Text Editing|,editing)
+
+This chapter describes some of the important interactive features
+of PPL.  As we have already seen, the user types commands
+to PPL at the !<top level>, possibly invoking one or more
+functions consisting of any number of stored statements.
+PPL also allows the user to control
+execution at the level of these stored statements, to examine
+or change the values of local variables after an error, and
+to make changes in the text of functions.  We shall now take
+up each of these topics in turn.
+
+.sec(Syntax Errors,synerr)
+.x syntax error
+.x error,syntax
+
+A !<syntax error> is detected by PPL
+immediately after the user has typed in
+a statement.
+The error may be some sort of illegal format
+in an editing command, or it may be
+an error such as unbalanced parentheses
+in a statement.  In all cases, PPL prints
+out a message that attempts to pinpoint the
+source of the error.
+Whenever a syntax error is detected
+by PPL, none of the given statement will have been executed.
+If a line of a function was being typed,
+PPL will repeat the line number and
+await a corrected version.
+
+Note that after an error, as well as at any other
+time, the  most recently typed statement may be reopened
+for editing simply by pressing the <<Escape> key.
+The mechanisms for text editing are
+presented in Sections {section! textedit} and {section! charedit}.
+
+.sec(Execution Errors,exerr)
+
+The second class of errors occurs during
+actual !<execution> of a statement.
+Such errors as attempts to use an %<unassigned/variable>
+in an expression can be detected
+by PPL only when the statement containing the
+expression is actually executed.
+Messages indicating %<execution/error>s are
+preceded either by the words "Execution error"
+or by an indication of what built-in function
+was being executed when the error was detected.
+The next line typed indicates where execution
+was stopped.  The message "Stopped in direct statement"
+means that the error was detected within a line
+the user had typed in for immediate execution.
+(The message is omitted if this is clear from context.)
+However, if the message is "Stopped in line"
+followed by a function name and line number,
+the error was detected during the execution of a user function.
+In this case, we say that execution has been
+!<suspended> within the @/<function,suspension/of> in question.
+PPL indicates its readiness to accept a command
+from the user in the suspended state by typing
+the characters 3S>1 in the eight spaces where it usually indents.
+
+While in this suspended state, the user
+may issue statements to be immediately executed,
+just as he could while in the !<global>
+.see top level,global
+(top level) @<environment,global> in which PPL was started.
+However, such statements are now interpreted
+in the @<environment,suspended> of the suspended function;
+that is, the %<procedure/identifier>, the formals,
+.x dummy argument
+.x argument,dummy
+the &<local/variable>s, and the <<label>s are accessible as
+if the immediate statement were a line of the
+function itself.
+
+The user is even allowed to change the values
+of any variables whose names are accessible
+in the current environment, and to resume
+execution at any statement in the function
+by means of a ~<<GOTO>~ to that statement.
+Typing ~<<RESUME>~ (i.e. calling the built-in parameterless
+function called ~RESUME~) will cause the
+statement that produced the error to be started
+over.  Thus, if the error was due to an %<unassigned/variable>,
+for example, we could continue execution by assigning
+the appropriate value and typing ~RESUME~.
+
+If the error is such that we cannot usefully
+resume execution, we may escape to the @<global environment,escaping to>
+by calling the built-in function
+~<<RESET>~.  A successful ~RESET~
+is signified by the fact that PPL again indents
+for a user command, but without typing 3S>1.
+Certain other operations, such as editing the text
+of a suspended function, will also cause an
+.x RESET,automatic
+.x automatic RESET
+automatic ~RESET~
+to be performed and a warning message typed.
+
+.sec(User Suspension,suspension)
+.x manual suspension
+.x suspension,manual
+
+Occasionally it is necessary for
+execution of a program to be prematurely
+terminated (because it has gone into an
+%<infinite/loop>, for example).
+To do so, the user should type <<Control-C> (twice in PPL-10).
+PPL will suspend execution and print out
+the name of the current function and the number
+of the statement it was executing.*<If the result of your typing Control-C is that
+the system prints '.' or '@' at the left margin, then
+control has fallen out of PPL and into the timesharing monitor.
+You should immediately issue a ~REENTER~ command to
+return control to PPL.>
+.x REENTER
+
+The user may now type statements for immediate
+execution in the %/<environment/of/suspension>,
+exactly as in the case where an error has occurred.
+Execution may be resumed if desired by typing 3<<RESUME>1,
+or may be begun at another statement by the use of
+the ~<<GOTO>~ operation.
+Using ~RESUME~ in this case will cause PPL to continue
+!<exactly> where it left off when it was interrupted by the user.
+This is in contrast with the use of ~RESUME~ after an error,
+when the statement in error is started over.
+
+The following protocol illustrates some
+possible errors and an example of user suspension.
+We are attempting to write a function {fn(PRIME,n)}
+which takes an argument of type ~INT~ and returns either
+~TRUE~ or ~FALSE~ depending on whether or not the number is prime
+(i.e. evenly divisible only by itself and one).
+
+.examp
+.tabs 9,31
+\$PRIME(N); I
+   [1]\I_2
+   [2]\IF I^2 > N THEN RETURN TRUE
+   [3]\IF I*IDIV(N,I) = N THEN RETURN FALSE
+   [4]\GOTO %2
+   [5]\$
+
+.apart group
+\PRIME(2)
+TRUE\\7Apparently correct results.3
+\PRIME(3)
+TRUE
+\PRIME(4(\7User makes a typing error.3
+\       ^---SYNTAX ERROR
+\PRIME(4)\7Retyped input correctly.3
+FALSE
+.apart group
+\PRIME(5)
+^C\\7Program goes into a loop.3
+^C\\7Control-C used to suspend it.3
+STOPPED BEFORE EXECUTING PRIME[4]
+     S> N\7Examining local variables in3
+5\\7  environment of suspension.3
+     S> I
+2
+     S> RESUME\7Resuming execution.3
+^C\\7Function resumes but is still in loop.3
+^C\\7  User must suspend it again.3
+STOPPED BEFORE EXECUTING PRIME[3]
+     S> I\7Value hasn't changed - there3
+2\\7  is a bug in the program.3
+.apart group
+     S> $PRIME[3.5]\7Edit the function, using text3
+[RESET EXECUTED]\7  editing facilities explained3
+ [3.5]\I_I+1\7  in {"Section!" textedit}.3
+ [3.6]\$
+
+\PRIME(5)\7Operation now correct.3
+TRUE
+\PRIME(13)
+TRUE
+\PRIME(14)
+FALSE
+.end
+
+.sec(Demanding Input from the User,demand)
+
+There is a third case which we might
+consider a suspension, though it really is not.
+A running program will request input from the
+user when it encounters a @@<question mark,denoting demand symbol>
+(called the !<demand symbol>) in a statement.
+The expression now typed in by the user
+will be evaluated and substituted for the
+<<demand symbol>, and execution will continue.
+
+This feature is useful for talkative
+programs that require input during their execution.
+A statement containing a demand symbol should
+usually be preceded by a statement that prints
+a message explaining what is being requested from the user.
+The following is a trivial example
+of the use of the demand symbol:
+
+.examp
+.tabs 9,31
+\$<<SQUARE>
+   [1]\"HI. I FIND SQUARES."
+   [2]\"GIVE ME A NUMBER, PLEASE."
+   [3]\N_?
+   [4]\"THE SQUARE OF THAT NUMBER IS"
+   [5]\N^2
+   [6]\$
+
+.apart group
+\SQUARE
+HI. I FIND SQUARES.
+GIVE ME A NUMBER, PLEASE.
+      ? 29\7Question mark typed by PPL.3
+THE SQUARE OF THAT NUMBER IS
+841
+.end
+
+A question mark followed by a @@<double quote,in STRING demand symbol>
+(3?"1) is the !<STRING demand symbol>, and is
+.x STRING demand symbol
+.x demand symbol,STRING
+similar to the normal demand symbol except that
+the user's reply is returned as a ~STRING~
+rather than being evaluated.
+For example:
+
+.examp
+\S_?"
+      ? MY NAME IS BILL
+\S
+MY NAME IS BILL
+.end
+
+.sec(Text Editing,textedit)
+.x text editing
+.x editing,text
+
+PPL has an extensive program editing
+mechanism that may be used any time
+PPL is requesting input from the user,
+except in the case of a string demand symbol (3?"1).
+Basically, what we can do is open an existing
+function for editing, make changes via insertion,
+deletion, or updating, and close the function
+again.
+
+Opening a function for editing consists
+.xx editing,opening function,for
+.see function editing,editing
+of typing a @@<dollar sign,to open function for editing>, the function name, and
+a line number enclosed in @@<square brackets,enclosing line number in editing command>.
+PPL responds by typing the line number
+at the left margin.  A new statement may
+now be typed to replace the old statement
+.x replacing statement in function
+.x statement,replacing
+with that number.
+
+Pressing Return causes the
+.x Return key
+newly-typed statement to replace the old,
+except that if the replacement line is empty
+(i.e. just Return is typed)
+the old line will not be replaced.
+PPL responds by typing
+the number of the next statement in sequence.
+This statement is in turn open for replacement if
+desired.
+
+To edit a statement which is not the next
+in sequence, the user should type a command consisting
+only of the number of the statement to be edited, enclosed
+in square brackets.  This line is
+interpreted as an editing command and
+does not replace the current statement.  PPL
+responds by typing the number of the new statement
+at the left margin.
+
+A statement may be inserted between two others
+.x inserting statement in function
+.x statement,inserting
+by specifying a !<Dewey-decimal> line number
+.x Dewey-decimal
+containing a decimal point and a one or two digit
+fractional part.  Thus, to insert a new statement between
+statements [2] and [3], one might input a statement [2.5].
+When Return is typed after this line, PPL sequences
+to statement [2.6] automatically.  Note that this sequencing
+is Dewey-decimal, so that [2.9] sequences to [2.10].
+
+The function is closed by typing a line
+containing only a @/<dollar sign,closing function/with>.  This again is interpreted
+only as an editing command, and the dollar sign
+does not replace the current statement.
+
+These operations become clearer by the use of
+an example.  We wish to define a function
+that will compute the sum of all the prime
+numbers between two limits specified as arguments.
+This is to be done using the ~<<PRIME>~ function
+defined in {"Section!" suspension}.  The function entered
+below is incorrect and causes an execution error.
+
+.examp
+\$<<SUMPRIME>(I,J)
+   [1]\FOR C_I:J DOTHRU %2
+   [2]\IF PRIME(C) THEN SUMPRIME_SUMPRIME+C
+   [3]\$
+
+\SUMPRIME(5,10)
+IN SYSTEM FN ADD:  IMPROPER ARGUMENT TYPE
+STOPPED IN SUMPRIME[2]
+     S> SUMPRIME
+LOCAL SUMPRIME HAS NO VALUE IN CURRENT ENVIRONMENT
+     S>
+.end
+
+The main problem is that we have forgotten to assign
+an initial value of zero to the procedure identifier
+~SUMPRIME~;  thus, in statement [2] the ~ADD~
+function (invoked by the '+' operator) fails
+because one of its operands has no value.
+This causes an execution error and suspension.
+We then ask for the value of ~SUMPRIME~ (in the environment
+of suspension) and verify that it is indeed undefined.
+
+We now want to insert a statement before line [1]
+of ~SUMPRIME~ to initialize the @/<procedure identifier,initialization/of>
+to zero.  While we are at it, we shall
+also change the function header so as to declare ~C~
+local.  Though the function will work perfectly well
+with ~C~ being global, it is good programming practice
+always to declare &<local/variable> all variables that need
+not be accessible outside the local environment.
+This is particularly true of common variable names
+(e.g. single letters) that might also be used in other
+functions.
+The required editing is as follows:
+
+.examp
+     S> $SUMPRIME[0.5]
+[RESET EXECUTED]
+ [0.5]\SUMPRIME_0
+ [0.6]\[0]
+   [0]\$SUMPRIME(I,J); C
+   [1]\$
+
+\SUMPRIME(5,10)
+12
+\SUMPRIME(1,100)
+1061
+.end
+
+We first request PPL to open the function ~SUMPRIME~
+at line [0.5], meaning that we want to insert a statement
+between lines [0] (the function header) and [1].
+Note that editing a suspended function causes PPL
+to execute a ~@<RESET,automatic>~ automatically.
+After inserting line [0.5], we press Return, and
+PPL now expects the user to type in a line [0.6];
+however, we wish to change the @<function header,editing>
+(considered to be line [0] during text editing),
+so we type zero in square brackets and press Return.
+After typing in a corrected line [0], we press
+Return and PPL sequences to statement [1],
+which we could now change if we wanted to.
+However, we type a dollar sign to close the function
+with no further changes.
+A few calls to ~SUMPRIME~ now seem to indicate
+correct operation.
+
+To find out exactly what our editing has done to
+the ~SUMPRIME~ function, we now !<display> it.
+.x displaying function
+.x function,displaying
+This is done by typing a @@<question mark,to display function> followed
+by the name of the function:
+
+.examp
+\? SUMPRIME
+.SKIP 1
+\$SUMPRIME(I,J); C
+   [1]\SUMPRIME_0
+   [2]\FOR C_I:J DOTHRU %3
+   [3]\IF PRIME(C) THEN SUMPRIME_SUMPRIME+C
+\$
+.end
+
+The first thing that may be noticed is that
+the statements have been renumbered
+.xx function,automatic renumbering,of
+using sequential line numbers.
+This operation is performed automatically upon
+closing the function.
+The second item of note is that, in statement [2]
+(previously statement [1]), the statement reference
+3%21 has been changed to 3%31, thus continuing
+to refer to the statement it previously referred to.
+Whenever PPL renumbers lines, it performs this
+conversion on all !<relocatable line numbers>.
+A %<relocatable/line number> is a decimal number of
+one to three digits preceded by a @@<percent sign,introducing relocatable line number>.
+During execution, a @/<relocatable line number,value/of>
+is exactly the same as an ~INT~; its special properties
+come into play only during text editing.
+
+(PPL cannot, at present, correctly process
+a reference to a statement whose line number
+contains a Dewey-decimal fractional part.
+To generate a correct reference, the function
+must first be closed and re-opened; doing so
+will cause the statement in question to be given
+an integer statement number, and all will be well.
+This restriction may be removed in some future version of PPL).
+
+A few other remarks should be made at this point.
+First, all editing operations presented thus far are also
+available while typing in a function for the first time;
+e.g. when PPL requests statement [6], we may go back
+and re-open statement [3] for editing,
+or insert a new statement such as [3.5].
+
+Second, a new or replacement statement not in sequence
+may be inserted by specifying a statement number
+in square brackets followed, on the same line, by the
+(non-blank) new text of the statement; i.e. it is not
+necessary to type a Return after the statement
+number and wait for PPL to respond with that
+statement number at the left margin.
+
+Finally, if in the process of editing a function we decide
+that we have made such a mess of it that we want to
+escape and try again, we may do so by typing
+@/<Control-C,aborting editing/with> (followed by 3<<REENTER>1 if necessary).
+This will nullify
+the effect of all editing since the function was
+last opened.
+
+.sec(Displaying the Text of Functions,displaying)
+
+In the preceding section we displayed
+the text of the function ~SUMPRIME~
+by typing the special command 3?SUMPRIME1.
+The text of any user-defined function may
+similarly be displayed in the same manner.
+To display a single statement rather than an entire
+@/<function,displaying single statement/of>, the user may specify a statement
+number in @@<square brackets,in display command>; for example:
+
+.examp
+\?PRIME[3]
+   [3]\IF I*IDIV(N,I) = N THEN RETURN FALSE
+.end
+
+A group of statements in a function may similarly be displayed
+by specifying the first and last statement numbers, separated
+by a colon.  For example:
+
+.examp
+\?EUCLID[0:1]
+\$EUCLID(M,N); R
+   [1]\R _ M-N*IDIV(M,N)
+.end
+
+.sec(Advanced Text Editing,charedit)
+.x text editing,advanced
+
+The line-by-line program editing facilities presented so far
+are sufficient for performing a majority of all modifications
+that need to be made to PPL programs.  However, there are some
+situations in which more powerful facilities are needed, such as
+when it is desired to systematically change all occurrences of
+some variable name to some other name.  PPL therefore provides
+a fairly complete, general-purpose text editing subsystem
+that may be called into use when necessary.*<At the time this edition
+of the manual was prepared, PPL-10 did not yet contain this
+advanced editing capability.  A character-by-character editing
+facility to be found in versions prior to 53 is documented
+in {"Appendix" apsup10}.>
+
+The text editor may be entered at any time when PPL is awaiting
+user typein by pressing the <<Escape> key (sometimes labelled
+.see Alt-Mode,Escape
+Alt-Mode or Esc).  If this is done before or during typein of
+a direct statement, then the statement being typed in (if any)
+or the entire text of the previous direct statement (if not)
+becomes the text to be edited.  If, however, a function is
+open for editing, the statement being typed in (if any)
+is entered as the current statement, and this statement
+becomes the default text to be edited.
+
+PPL then prints an asterisk ('*') at the left margin
+to signal that the text editor has been entered.
+The remainder of this section is devoted to describing
+the commands that may be issued to the text editor.
+Text editor mode may be left by simply pressing Return
+in response to the editor's '*', at which point PPL
+re-translates all affected statements and executes or stores
+them as appropriate and returns to normal command input mode.
+
+.ssec(Text Editor Command Format,textcom)
+
+Commands to the text editor consist of complete lines,
+terminated by Return.  The usual control characters may
+be used to correct mistakes (<<Rubout> and <<Control-U> in
+the DECsystem-10 and Unix versions of PPL, and <<Control-A>
+and <<Control-Q> in the Tenex version), and commands may be
+continued on subsequent lines by use of the percent sign convention
+described earlier.
+
+The general form of a text editing command is as follows:
+
+.begin nofill indent 8
+
+[ !<range> ] !<repetition> !<verb> !<string>{sub(1)} $ !<string>{sub(2)}
+.end
+
+Not all fields are required for every command and default values
+will be supplied by PPL as explained below.
+'$' stands for the Escape (or Alt-Mode) character,
+which echoes as a dollar sign, and is required to terminate
+the !<string>{sub(1)} if a !<string>{sub(2)} is given.
+An Escape is also required following !<string>{sub(2)} if it ends in
+the percent-sign character to prevent it from being interpreted
+as a continuation line.
+
+The [!<range>] portion of the command determines the
+.xx text editing command,range,portion of
+range of statement numbers over which the command is to
+apply.  This may be a single statement number or a pair of
+numbers separated by a colon.  A @@<period,denoting current statement> ('.') may be used
+to denote the current statement, or an @@<asterisk,denoting entire function> ('*') to
+denote the entire function.  Hence, 3[3]1, 3[2:7]1,
+3[1,.]1, 3[.,13]1, and 3[*]1 are all legal
+range specifications.  If the range specification is omitted,
+the command applies only to the current statement.
+The range specification is illegal unless a function is
+being edited.
+
+The !<repetition> is a positive integer determining the number
+.xx text editing command,repetition,portion of
+of times the command is to be repeated.  It is relevant only
+in those commands that search for and operate on strings.
+A repetition count of '*' (an @@<asterisk,denoting indefinite repetition>) indicates that the
+command is to be repeated indefinitely, i.e. as many times as
+is possible in the specified range.  The default repetition count
+is one.
+
+The !<verb> specifies the operation to be performed.  It is made up
+.xx editing command,verb,portion of
+of alphanumeric characters, and may be abbreviated to any
+unique initial substring (note that at present all commands are
+uniquely determined by their first character).  The verb must
+be followed by a non-alphanumeric character if any string
+arguments follow it.  If the delimiter is a space,
+it is not included as the first character of !<string>{sub(1)};  but if
+it is anything but a space, it is included.  Characters after the
+delimiter are included in !<string>{sub(1)}
+even if they are spaces.  (In the @@<Tenex,editing command recognition in> version, command recognition
+will be carried out if @/<Escape,editing command recognition/with> is struck during typein of the verb.
+Recognition consists of typing out the remainder of the command
+and the terminating space.)
+
+!<string>{sub(1)} and !<string>{sub(2)} are sequences of one or more legal
+.xx editing command,string argument,in
+PPL characters.
+Various commands take zero, one, or two string arguments.
+Excess strings are ignored (a warning message is typed out).
+
+.ssec(Current Statement and Character Position,textcur)
+
+The !<current statement> is a particular statement in the
+.x current statement
+.x current character position
+currently open function (if there is one), and the !<current
+character position> is a pointer lying between two adjacent
+characters in the current statement, or at the
+beginning of the statement.  All <<string search>es in commands
+with no range specification or with a specification of the
+form 3[.:!<n>]1 (where !<n> is a statement number) begin at the
+current character position.
+
+The character position is reset to the beginning of the
+current statement at the !<end> of the commands ~INSERT~, ~REPLACE~, and ~DELETE~ as well
+as ~FIND~ commands which are unsuccessful.
+The current statement number is not changed by any command except ~FIND~.
+Commands other than ~FIND~ that perform string searches through
+specified ranges of statements temporarily leave the character
+pointer at the end of the last string searched for so as to
+be able to perform repetitions, but never change the current statement number
+and always reset the character position to the beginning of the
+current statement when they are finished.
+
+.ssec(Individual Commands,textdesc)
+
+.macro desc 
+.if lines<6 then next page
+.skip 1
+.begin nofill indent 8 select 3
+. 
+
+The following are the individual text editor commands and
+their functions:
+
+.desc
+[!<r>] !<n> @/<REPLACE,editing command/> !<string>{sub(1)} $ !<string>{sub(2)}
+.end
+
+In the range !<r>, replace the first !<n> occurrences of !<string>{sub(1)} by
+!<string>{sub(2)}.
+
+.desc
+[!<r>] !<n> @/<DELETE,editing command/> !<string>{sub(1)}
+.end
+
+In the range !<r>, delete the first !<n> occurrences of !<string>{sub(1)}.
+
+.desc
+[!<r>] !<n> @/<INSERT,editing command/> !<string>{sub(1)} $ !<string>{sub(2)}
+.end
+
+In the range !<r>, insert !<string>{sub(1)} after the first !<n> occurrences
+of !<string>{sub(2)}.  If !<string>{sub(2)} is not supplied, insert !<string>{sub(1)} !<n> times at
+the current pointer position.
+
+.desc
+[!<r>] !<n> @/<FIND,editing command/> !<string>{sub(1)}
+.end
+
+In the range !<r>, find the !<n>th occurrence of !<string>{sub(1)}, and
+leave the current character pointer at the end of that string.
+This command also changes the current statement to be the
+one in which the !<n>th occurrence of !<string>{sub(1)} was found.
+If !<string>{sub(1)} is empty, ~FIND~ uses the string argument to
+the most recent ~FIND~ as its default.
+If there are less than !<n> occurrences of !<string>{sub(1)} in the
+given range, the character pointer is reset to the beginning
+of the line that was current when the ~FIND~ command was issued.
+
+.desc
+[!<r>] @/<TYPE,editing command/>
+.end
+
+Type out all the statements in the range !<r>.
+Repetition and string specifications are illegal.
+
+.desc
+[!<r>] @/<KILL,editing command/>
+.end
+
+Delete all statements in the range !<r>.  Repetition and string specifications
+are illegal.
+
+.desc
+@/<VERBOSE,editing command/>
+.end
+
+Enter verbose mode, in which an automatic ~TYPE~ command is
+executed after every command that uses string arguments.
+Range, repetition, and string arguments are illegal.
+
+.desc
+@/<CONCISE,editing command/>
+.end
+
+Leave verbose mode.  Range, repetition, and string arguments
+are illegal.
+
+For compatibility with normal PPL line editor commands,
+the following commands may also be given to the text editor:
+
+.desc
+[!<n>]
+.end
+
+(i.e. a command consisting entirely of a single statement number
+in square brackets)  Make statement !<n> be the current statement,
+and reset the current character position to the beginning of
+that statement.
+
+.desc
+$
+.end
+
+(i.e. just a dollar sign)  Exit the text editor and close
+the current function, just as occurs when '$' is typed as
+a command to the line editor.

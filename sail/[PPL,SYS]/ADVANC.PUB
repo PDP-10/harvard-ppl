@@ -1,0 +1,1446 @@
+.chap(Advanced Features and Programmer Aids,advanced)
+
+This chapter covers some information necessary
+for certain kinds of programming in PPL.
+In previous sections, some explanations have purposely
+been incomplete so as to avoid cluttering them
+with extraneous detail.  We shall now complete these
+explanations.  Several built-in functions not previously
+mentioned are also covered.  The user is urged to
+consult {"Appendix!" appbuiltin} for a complete list of
+built-in functions.
+
+.sec(Advanced Debugging Facilities,stoptrace)
+.see debugging,|STOP, TRACE|
+
+To supplement PPL's extensive editing
+facilities and conversational mechanics, a set
+of debugging features have been included;
+collectively they are known as !<stop and trace>.
+
+To activate and deactivate the
+stop and trace features, there exist four
+built-in functions:  ~<<STOP>~, ~<<UNSTOP>~, ~<<TRACE>~, and ~<<UNTRACE>~.
+Each of these functions takes a function name
+as its first argument, !<preceded by a dollar sign>,
+.x dollar sign,preceding function name in STOP and TRACE
+and optionally some
+additional integer arguments which
+designate the numbers of statements to be
+affected.
+If no integer arguments are furnished, all
+steps of the function designated by the first
+argument are affected.  For example:
+
+.begin indent 8,30 tabs 31
+3STOP($F, 1, 3, 4, 7)\1Marks steps 1, 3, 4, and 7
+of the function ~F~ to stop.
+
+3STOP($G)\1Marks all steps of the function
+~G~ to stop.
+
+3UNSTOP($G, 4, 5)\1Removes the stop codes
+from statements 4 and 5 of the function ~G~.
+
+3TRACE($G)\1Marks all steps of ~G~ for tracing.
+
+3UNTRACE($G, 3)\1Removes the trace code from statement
+3 of ~G~.
+.end
+
+If step !<n> of function ~F~ is marked for tracing,
+then, after each execution of that statement,
+PPL will print 3F[!<n>]1 followed by the value of the
+statement on line !<n> of ~F~.  All statements
+in PPL have printable values. Non-value-returning
+.xx TRACE,value,of statement in
+.xx IF form,NULL,value of
+.xx FOR form,NULL,value of
+.xx WHILE form,NULL,value of
+.xx REPEAT form,NULL,value of
+procedure calls, conditionals in which the
+condition evaluates to ~FALSE~ and there is no
+~ELSE~ expression, and ~FOR~, ~WHILE~, and ~REPEAT~ forms
+all have the value ~NULL~.
+In the case of
+assignment statements the value of the right hand
+side is printed, and in the case of ~@/<GOTO,value/of>~s the
+number of the target statement is printed.
+
+When step !<n> of the function ~F~ is marked
+to stop, an attempt to execute step 3F[!<n>]1 will
+cause the function to be suspended;
+.x suspension,by STOP
+control will be passed to the user in the environment of
+suspension exactly as if he had stopped execution himself.
+The suspension occurs !<before> the execution of
+statement 3F[!<n>]1.
+At this point, values of variables may be
+examined and reset and expressions may be computed
+in the environment of suspension.
+Execution may be resumed by calling the built-in function
+~<<RESUME>~, or may be started at another statement
+by executing 3<<GOTO>#%!<k>1, where !<k> is a statement number.
+All this has already been explained in
+the presentation of user suspension in {"Section!" suspension}.
+
+If ~STOP~, ~UNSTOP~, ~TRACE~, or ~UNTRACE~
+is called with improper second and succeeding
+arguments (e.g. statement numbers out of range,
+or non-integers), an error will result and one
+cannot be assured that the designated
+operation has taken place properly.
+
+After editing a function, the stop and
+.x editing,effect on STOP and TRACE
+.x STOP,effect of editing
+.x TRACE,effect of editing
+trace codes of every statement of that function
+are reinitialized to the 'off' condition.
+This is because statements may have been
+altered, deleted, or renumbered.
+
+In the following example, we use ~TRACE~ to trace
+the flow of control through a slightly modified version of the ~EUCLID~ function
+defined in {"Section!" gotos}:
+
+.examp
+\$<<EUCLID>(M,N); R
+   [1]\R _ M-N*IDIV(M,N)
+   [2]\IF R=0 THEN RETURN N
+   [3]\M_N
+   [4]\N_R
+   [5]\GOTO %1
+   [6]\$
+
+.apart group
+\TRACE($EUCLID)
+\EUCLID(544,119)
+EUCLID[1] 68
+EUCLID[2] NULL
+EUCLID[3] 119
+.apart
+EUCLID[4] 68
+EUCLID[5] 1
+EUCLID[1] 51
+EUCLID[2] NULL
+EUCLID[3] 68
+EUCLID[4] 51
+EUCLID[5] 1
+EUCLID[1] 17
+EUCLID[2] NULL
+EUCLID[3] 51
+.group
+EUCLID[4] 17
+EUCLID[5] 1
+EUCLID[1] 0
+EUCLID[2] 17
+17
+.end
+
+Since ~STOP~ and ~TRACE~ are line-oriented,
+they are clearly easiest to use when the ~STOP~ped and ~TRACE~d
+statements are very simple.  In multiple expressions, for example,
+only the value of the last expression will be printed out by ~TRACE~.
+
+In the PDP-10 version, the function ~BACKTRACE~ is provided
+as an additional debugging feature.
+.x BACKTRACE
+Calling ~BACKTRACE~ has the effect of printing the names and current
+step numbers of all functions entered, starting with the most
+recent.
+This is particularly valuable when computation has been suspended
+in order to follow the execution path to the point of the error.
+
+.sec(Environmental Inquiries,envinq)
+
+The following built-in parameterless procedures return ~<<TUPLE>~s of ~<<STRING>~s
+enumerating all instances of particular classes of definitions
+in the current environment (available in the PDP-10 version only):
+
+.begin indent 0,20 tabs 21
+~<<FUNCTIONS>~\Returns a list of all the user-defined functions known to PPL.
+
+~<<VARIABLES>~\Returns a list of all defined !<global> @<variable,global>s, i.e.
+all variables except those local to the current function (if any).
+
+~<<DATA.DEFINITIONS>~\Returns a list of all data definitions made by the user,
+including structure, sequence, and alternate definitions.
+.end
+
+There are also several functions for obtaining more information
+about the class of object denoted by a particular @@<identifier,class of>.*<At
+present, these functions operate correctly only for global identifiers.>
+Each function returns ~TRUE~ if the object belongs to the stated class
+and ~FALSE~ otherwise;  in no case will an error result.
+Of the following functions, only ~UNASSIGNED~ is implemented
+in the PDP-11 version.
+
+.begin indent 0,20 tabs 21
+{fn(UNASSIGNED,x)}\Returns ~TRUE~ if the identifier !<x> has not been defined
+in any way (or has been ~ERASE~d).
+
+{fn(VARIABLE,x)}\Returns ~TRUE~ if !<x> is the name of a variable.
+
+{fn(SYSTEM.FN,x)}\Returns ~TRUE~ if !<x> is the name of a built-in function.
+
+{fn(USER.FN,x)}\Returns ~TRUE~ if !<x> is the name of a user-defined function.
+
+{fn(ATOMIC.TYPE,x)}\Returns ~TRUE~ if !<x> is one of the built-in atomic
+data type names (~INT~, ~REAL~, ~DBL~, ~CHAR~, ~BOOL~, or ~NONE~).
+
+{fn(COMPOSITE.TYPE,x)}\Returns ~TRUE~ if !<x> is the name
+of a structure or sequence definition (including the built-in
+definitions ~STRING~ and ~TUPLE~).
+
+{fn(ALTERNATE.TYPE,x)}\Returns ~TRUE~ if !<x> is the name of an
+alternate definition (including the built-in alternate definitions
+~ATOMIC~, ~STRUCTURE~, ~SEQUENCE~, ~V.SEQUENCE~, and ~GENERAL~).
+
+{fn(SELECTOR.NAME,x)}\Returns ~TRUE~ if !<x> is the name of a selector defined
+in one or more structure definitions.
+
+{fn(CLASS,x)}\Returns a ~STRING~ describing the class of the variable !<x>.
+This ~STRING~ consists of the name of whichever of the above
+functions would have returned ~TRUE~ if given !<x> as an argument;
+i.e. the result will be one of ~"UNASSIGNED"~, ~"VARIABLE"~, etc.
+.end
+
+.sec(Copying and Sharing,copshr)
+.xx data,copying,of
+.xx data,sharing,of
+
+In writing programs using many varieties of data
+one discovers that sometimes one wants to copy substructures
+of structures and, on other occasions, one wants to share
+the use of certain substructures among several structures or
+variables.  For example, in matrix manipulation (and indeed
+in almost all kinds of arithmetic such as formula or polynomial
+arithmetic) one wants to copy substructures.
+Suppose we have issued the following statements:
+
+.examp
+\$<<VECTOR> = [1: ] INT
+
+\$<<ARRAY> = [1: ] VECTOR
+
+\M_ARRAY(VECTOR(32,57),VECTOR(),VECTOR(1,2,3,4))
+\V_M[3]
+.end
+
+When one extracts the ~VECTOR V~ that is the
+third row of the ~ARRAY M~, under most circumstances
+the value ~V~ should be a !<copy> of the third row of ~M~.
+If ~V~ were to !<share> the same row vector as the third row of
+~M~, then any @<assignment,retroactive> of new components to ~V~ would
+retroactively change components of ~M[3]~, an undesirable behavior.
+On the other hand,
+sharing is just the relationship that permits changes in
+components to be transmitted to all owners of a shared substructure.
+If for example, the title, author and subject cards in a library
+card catalog could share common information about a book in the
+form of a shared substructure, then a change in information about
+the book could be made once instead of three times.
+This arrangement saves time and space.
+
+.ssec(Non-Copy Assignment,noncopy)
+
+In PPL, a measure of control exists over the choice
+between !<copying> and !<sharing> of structures at the time of assignment.
+In particular, expressions of the form !<v>_!<e> cause the value of the
+expression !<e> to be copied before being assigned to be the value of !<v>,
+whereas expressions of the form !<v>__!<e> cause the value of the
+expression !<e> to be assigned as the value of !<v> !<without> first copying it.
+This latter form of @<assignment,non-copy> is called !<non-copy assignment>.
+It is used to set up sharing relationships.
+
+The following example makes use of the definitions
+of ~VECTOR~ and ~ARRAY~ that were made in
+the previous example.
+
+.examp
+.tabs 9,35
+\M_ARRAY(VECTOR(11,12,13),VECTOR(21,22))
+\V_M[1]\7A !<copy> of M[1] is assigned to V.3
+\V[2]_99\7A component of V is replaced.3
+\V
+[11,99,13]
+\M\7Note that M is unchanged;3
+[[11,12,13],[21,22]]\7   only the copy in V was changed.3
+.apart group
+\V__M[1]\7Now V !<shares> the value of M[1].3
+\V[2]_99
+\V
+[11,99,13]
+\M\7M[1,2] now reflects the change made3
+[[11,99,13],[21,22]]\7   to V[2], since V and M[1] share
+\\   the same value.
+.end
+
+Non-copy assignment can also be used to set up @<data structures,cyclic> containing cycles and to model <<pointer>s. For
+example:
+
+.examp
+\Y_[23,0,-99]
+\Y[2]__Y
+.end
+
+The last statement above causes ~Y[2]~ to share
+the value of ~Y~;
+this is what is known as an !<infinite regress>.
+.x infinite regress
+
+Pointers can be modeled by use of sharing as follows
+(note:  the use of 3$X1 as a dummy argument is
+explained in Section {subsection! callbyref}).
+
+.examp
+.tabs 9,33
+\$PTR = [VAL:GENERAL]
+
+\$MKREF($X)
+   [1]\MKREF_PTR(0)\7Makes PTR with 0 as value.3
+   [2]\MKREF[VAL]__X\7Shares referent X as value3
+   [3]\$7\   of pointer.
+.end
+
+Once we have made these definitions, 3R__MKREF(X)1 creates a pointer
+to a datum X, and 3VAL(R)1 acts on the reference ~R~ to recover
+the value ~X~. Thus, a ~PTR~ is an object, usable as a component of another object,
+having a value, ~VAL~, which designates a second object ~X~ by sharing.
+
+It is important to note that non-copy assignment
+results in a !<sharing> relationship and not an !<equivalence>
+relationship.  That is, the statement
+
+.examp
+\A__B
+.end
+
+does not mean "make ~A~ and ~B~ be the same variable";
+rather it means "make ~A~ share the current value of ~B~".
+Thus, if we later assign a new value to ~B~, e.g.
+
+.examp
+\B_COMPLEX(X/Y,34.7)
+.end
+
+this causes no change in the value of ~A~.
+The value of ~A~ continues to be the datum that
+was assigned to it;  it is no longer shared
+because the sharing relationship between ~B~ and that datum
+has been broken.
+
+.ssec(Calls by Value and by Reference,callbyref)
+
+The issue of copying versus sharing
+also arises in parameter passing when
+making a function call.
+.xx function call,copying,in
+.xx function call,sharing,in
+PPL allows the user a choice of whether
+or not arguments are to be copied before
+being passed to a subroutine.
+
+The normal convention is known as
+!<call by value>, which means that the callee
+.x call by value
+.x value,call by
+is provided only with a copy of the value of the argument;
+no other information about the corresponding
+actual parameter is passed.
+As explained in {"Section!" functiondef}, the %<dummy/argument>s
+are simply
+initialized with copies of the values of the
+calling parameters;  from then on they
+behave as locals.
+Thus, PPL's normal convention
+with regard to parameter passing is
+one of copying each argument before
+making the call.
+
+The other system is known as
+!<call by reference>.
+.x call by reference
+.x reference,call by
+A parameter passed by reference is not copied
+and retains the information necessary
+to access the actual parameter directly.
+
+The user indicates, at function
+definition time, which arguments
+are to be passed by reference.
+This is done by preceding each such
+dummy argument by a @@<dollar sign,signalling argument passed by reference> in the
+function header line.  All other arguments will
+be passed by value as usual.
+
+The following examples illustrate
+the behavior of call by reference
+as opposed to call by value.
+
+.examp
+.tabs 9,35
+\$<<CBV>(A,B,C)\7Example of call by value3
+   [1]\A_3.4
+   [2]\B[3]_5
+   [3]\C_C+1
+   [4]\$
+
+.apart group
+\X_1.0
+\Y_[1,2,3,4]
+\Z_[3,2,4,1]
+\CBV(X,Y,Z[3])
+\X
+1.\\7Note unchanged calling parameters3
+\Y
+[1,2,3,4]
+\Z
+[3,2,4,1]
+
+.apart group
+\$<<CBR>($A,$B,$C)\7Example of call by reference3
+   [1]\A_3.4
+   [2]\B[3]_5
+   [3]\C_C+1
+   [4]\$
+
+.apart group
+\CBR(X,Y,Z[3])
+\X
+3.4\\7Note effect of call by reference3
+\Y
+[1,2,5,4]
+\Z
+[3,2,5,1]
+.end
+
+Call by reference is actually somewhat more powerful
+than the above examples would indicate.
+Arguments passed by reference may include
+such things as @@<function name,passed by reference>s and @@<selector,passed by reference>s,
+which are not assignable quantities in PPL.
+For example, the following function, {fn(MAPCAR,f,l)},
+takes as its arguments a function !<f> and a ~TUPLE~ !<l>.
+It returns a ~TUPLE~ constructed by distributively applying the function !<f>
+to each element of !<l>.
+.x distributive application of function to TUPLE
+This operates correctly only because the function
+name is passed by reference.
+
+.examp
+\$MAPCAR($F,L); I
+   [1]\MAPCAR_MAKE(TUPLE,LENGTH(L),0)
+   [2]\FOR I_1:LENGTH(L) DO MAPCAR[I]_F(L[I])
+   [3]\$
+
+\X_[1,2,3,4,5]
+\MAPCAR(SQRT,X)
+[1.,1.414214,1.732051,2.,2.236068]
+.end
+
+.ssec(RETURN,returnbyref)
+.xx reference,RETURN,by
+
+Values returned by use of the ~RETURN~ statement (as opposed to
+being assigned to the procedure identifier) are always returned
+by reference, in a manner analogous to making calls by reference.
+By this means, one may write functions that return the names of
+other functions, predicates, selector names, and so forth as their
+results.
+
+The built-in function {fn(SRETURN,e)} has precisely the same effect as the statement ~RETURN~ !<e>.  It is included so as to permit one to define a unary operator invoking the ~RETURN~ operation.
+
+.ssec(IDENTICAL,identical)
+
+To permit programs to detect the existence of sharing relationships, the built-in function {fn(IDENTICAL,a,b)} returns ~TRUE~ if !<a> and !<b> share the same value.*<At present, IDENTICAL is implemented only in the PDP-10 version.>  Among other things, this facilitates writing user programs to operate on cyclic or reentrant data structures.  Note that ~ATOMIC~ objects with the same value are identical by definition, since they are semantically indistinguishable.  For example:
+
+.examp
+\X_[1,2,3,4,5]
+\Y_X; Z__X
+\IDENTICAL(X,Y)
+FALSE
+\IDENTICAL(X,Z)
+TRUE
+.end
+
+.sec(Functions Taking Variable Numbers of Arguments,tuparg)
+
+In the PDP-10 version, it is possible to define functions which
+may be called with an indefinite number of arguments, in
+a manner similar to calling built-in %<variadic/function>s such
+as ~<<ERASE>~ and ~<<PRINT>~.  For example, suppose we wish to define
+a procedure called ~<<MAX>~ which takes an arbitrary number of
+numeric arguments and returns their maximum.  This may be
+accomplished as follows:
+
+.examp
+\$MAX(A,[B); I
+   [1]\MAX_A
+   [2]\FOR I_1:LENGTH(B) DO IF B[I]>MAX THEN MAX_B[I]
+   [3]\$
+
+\MAX(23,57)
+57
+\MAX(99,48,29,187,35+8,157-85)
+187
+.end
+
+As is demonstrated above, a user-defined function is made
+variadic by prefixing the !<last> %<dummy/argument> with a left
+@@<square bracket,distinguishing variadic function>.  When the function is called, the corresponding
+actual parameter and all remaining arguments are collected together
+and passed as a ~@@<TUPLE,in variadic function call>~.  It is up to the function to enumerate the
+components of this ~TUPLE~ and perform whatever processing is
+appropriate.
+
+To clarify the operation of this form of parameter passing, we
+might set a stop code in the function ~MAX~ so as to be able to
+examine the value of the parameter ~B~:
+
+.examp
+\<<STOP>($MAX,1)
+\MAX(23,57)
+STOPPED BEFORE EXECUTING MAX[1]
+\B
+[57]
+\RESUME
+57
+.apart group
+\MAX(99,48,29,187,35+8,157-85)
+STOPPED BEFORE EXECUTING MAX[1]
+\B
+[48,29,187,43,72]
+\RESUME
+187
+.apart group
+\MAX(123)
+STOPPED BEFORE EXECUTING MAX[1]
+\B
+[]
+\RESUME
+123
+.end
+
+.sec(EXECUTE,execute)
+
+PDP-10 PPL contains a built-in function {fn(EXECUTE,s)} which accepts a ~@@<STRING,argument to EXECUTE>~ !<s> as its
+argument and causes the text of the ~STRING~ to be executed
+as PPL statements, exactly as if these statements had been typed
+directly by the user.  For example:
+
+.examp
+\EXECUTE("1+2")
+3
+\A_CONCAT("B_111+", MAKE(STRING,10,'3))
+\EXECUTE(A)
+\B
+3333333444
+.end
+
+If PPL encounters a &/<syntax error/in/EXECUTE> while evaluating text supplied to
+~EXECUTE~, the appropriate error message will be printed and
+a corrected version of the text will be requested from the user.
+
+The ~EXECUTE~ function is useful in a wide variety of ways.
+For example, one may manufacture new variable names and other
+identifiers from ~STRING~s:
+
+.examp
+\EXECUTE("A") _ 2
+\A
+2
+\S_"I AM A STRING"
+\EXECUTE(TYPE(S))('X, 'Y, 'Z)
+XYZ
+.end
+
+.x TYPE,used with EXECUTE
+The second example deserves some explanation.  The expression
+3TYPE(S)1 returns the type of the variable ~S~
+as a ~STRING~;  i.e. it returns ~"STRING"~.  Then ~"STRING"~ is passed
+as an argument to ~EXECUTE~ and is evaluated to the identifier ~STRING~.
+Hence the effect of the entire statement is equivalent to
+
+.examp
+\STRING('X, 'Y, 'Z)
+.end
+
+.x constructor function,STRING
+i.e. a call to the constructor function ~STRING~.
+
+This sort of construction is particularly useful in writing
+general-purpose functions for performing operations on any of
+a wide range of data types.  For example, suppose we want
+a function {fn(APPEND,s,e)} which appends the element !<e> to the
+variadic sequence !<s>, regardless of the actual type of !<s>.
+(Of course, !<e> must be legal as a component of !<s>.)
+This may be accomplished as follows:
+
+.examp
+\$APPEND($S,E)
+   [1]\S _ <<CONCAT>(S, EXECUTE(TYPE(S))(E))
+   [2]\$
+
+\Z_"ABC"
+\APPEND(Z,'D)
+\Z
+ABCD
+\T_[2, "QQQ", Z]
+\APPEND(T, S)
+\T
+[2,QQQ,ABCD,I AM A STRING]
+.end
+
+Another use of ~EXECUTE~ is to construct and execute a PPL statement
+from fragments obtained from the user via the
+.x STRING demand symbol
+.x demand symbol,STRING
+~STRING~ demand symbol (?").
+For example, the following procedure, ~<<INTUPLE>~, returns as a ~TUPLE~
+a sequence of data items input by the user on a single line, separated
+by commas.
+
+.examp
+\$INTUPLE
+   [1]\INTUPLE _ EXECUTE(CONCAT("[", CONCAT(?", "]")))
+   [2]\$
+
+\INTUPLE
+      ?\2, 4, 6+1, "HELLO", COMPLEX(3.1, 4.7)
+[2,4,7,HELLO,[RP:3.1,IP:4.7]]
+.end
+
+The text evaluated by ~EXECUTE~ may include function and data definitions.
+.x function definition,and EXECUTE
+.x data definition,and EXECUTE
+Hence it is possible to create new functions at execution time:
+
+.examp
+.tabs 9,30
+\PROG _ "$F(X) %
+\F_2*X %
+\$ %
+\"
+\PROG
+$F(X)
+F_2*X
+$
+\TYPE(PROG)
+STRING
+\EXECUTE(PROG)
+\?F
+
+\$F(X)
+   [1]\F_2*X
+\$
+.end
+
+For convenience in calling built-in functions that require identifiers
+(e.g. function names) as arguments, such as ~<<UNARY>~, ~<<BINARY>~, ~<<MAKE>~, etc.,
+the PDP-10 version allows the user to supply ~STRING~s in those argument positions.
+Such ~STRING~s are automatically evaluated to identifiers
+.x STRING,automatic evaluation to identifier
+.x identifier,use of STRING in place of
+as if ~EXECUTE~ had been applied to them.  Hence,
+
+.examp
+\BINARY("+", "ADD")
+\MAKE("VECTOR", 10, 123.4)
+.end
+
+is precisely the same*<With the exception that the former example
+takes longer to execute because of the identifier lookups that
+PPL must perform.> as:
+
+.examp
+\BINARY("+", ADD)
+\MAKE(VECTOR, 10, 123.4)
+.end
+
+This feature is handy for making use of the results of built-in
+functions that return the names of identifiers as ~STRING~s, such as
+~<<TYPE>~, ~<<UNARY.DEF>~, ~<<BINARY.DEF>~, etc.  For example, here is a function
+{fn(COPY.BINARY.OP,a,b)}, which defines the operator !<b> (expressed as a ~STRING~)
+to be the same as the existing binary operator !<a>:
+
+.examp
+\$COPY.BINARY.OP(A,B)
+   [1]\BINARY(B,BINARY.DEF(A),BINARY.PREC(A),ASSOCIATIVITY(A))
+   [2]\$
+
+\2^13
+8192
+\COPY.BINARY.OP("^", "**")
+\2**13
+8192
+.end
+
+For other examples of the use of this feature, the user should
+display the definitions of the built-in functions
+~<<RENUMBER>~ and ~<<IVERSONIAN>~ (described in {"Section!" iversonian}).
+
+.sec(Unevaluated Identifiers,uneval)
+
+In previous sections we have presented several built-in
+functions that take the names of other functions
+as arguments; for example, ~ERASE~ ({"Section!" erasing})
+and the stop/trace functions ({"Section!" stoptrace}).
+In these explanations the user was
+warned always to precede the names of functions with
+a dollar sign when using them as arguments to other
+functions.
+
+An identifier preceded by a @@<dollar sign,denoting unevaluated identifier> is called
+an !<unevaluated identifier>; i.e. the dollar
+.x unevaluated identifier
+.x identifier,unevaluated
+sign prevents the immediate evaluation of the identifier
+upon its being encountered.
+
+If ~F~ is a user-defined function, the statement
+
+.examp
+\@@<ERASE,and unevaluated identifiers>(F)
+.end
+
+causes the current definition of ~F~ to be erased.
+If ~F~ is a function of one or more arguments, it
+is easy to distinguish a !<call> of ~F~
+.x function call,distinguished from function name
+.x function name,distinguished from function call
+(with arguments) from the use of '~F~' to designate its own
+name, since all calls of ~F~ must be accompanied by argument lists.
+However, if ~F~ is a %<parameterless/procedure> (i.e. it takes
+no arguments), the call of ~F~ and the use of ~F~ to denote its
+own name coincide.  In this case, by convention,
+the use of ~F~ denotes the !<call> of the parameterless
+procedure ~F~, rather than the !<name> '~F~'.
+In order to use ~F~ as a name (e.g. passed as an argument
+to another function), it is necessary to precede the
+name by a dollar sign to inhibit its immediate evaluation.
+
+For example, if ~F~ is a parameterless procedure
+and we issue the statement
+
+.examp
+\ERASE(F)
+.end
+
+PPL will first evaluate
+~F~ (by calling the function ~F~ so as to return
+a value), then will try to ~ERASE~ the value
+returned by ~F~; this will cause an execution error.
+On the other hand, if we type
+
+.examp
+\ERASE($F)
+.end
+
+the dollar sign will indicate to PPL that
+the function ~F~ is not to be called but rather
+that the !<name> ~F~ is to be passed directly
+as a parameter to ~ERASE~.
+
+If the function ~F~ takes arguments,
+then this difficulty does not arise; i.e.
+the statement
+
+.examp
+\ERASE(F)
+.end
+
+is unambiguously interpreted to mean "erase the name ~F~";
+the use of ~F~ could not possibly denote a function call
+because there is no argument list following the name.
+However, it is recommended that the user always precede
+function names used as arguments by dollar signs
+even in this case.
+Doing so will develop a regular habit
+and reduce the possibility of forgetting
+the dollar sign in the cases in which it
+is actually needed.
+
+.sec(Further Information on ERASE,moreerase)
+
+While we are mentioning the ~<<ERASE>~ function,
+we should
+note that it is legal to ~ERASE~ the
+meaning of almost any identifier in PPL,
+including the ones corresponding to
+built-in functions (e.g. ~ADD~) and values (e.g. ~TRUE~).
+The only identifiers that may not be ~ERASE~d
+.x ERASE,illegal arguments
+are the predicates for atoms (~INT~, ~REAL~, etc.),
+the built-in data definitions ~STRING~ and ~TUPLE~,
+and the names used as special symbols (e.g. ~THEN~).
+
+When ~ERASE~ing a data definition, the user
+.x data definition,and ERASE
+.x ERASE,and data definition
+should exercise extreme caution that there exist no instances
+of data constructed according to that definition.*<Failure to observe this precaution may
+lead to internal errors within PPL-10 (often
+a long time later).>  Generally, the only justification
+for erasing a data definition is to allow a corrected
+version of the same definition to be typed in,
+or to entirely remove one not being used.
+For further information, refer to the discussion
+of system errors in {"Appendix!" appproblems}.
+
+Occasionally it is desired to give a built-in function a new name
+.x function,renaming
+.x renaming function
+so as to be able to use the old name of the function for
+some other purpose.  The built-in function {fn(COPYSF,a,b)}, where !<b> is
+the name of a built-in function, defines !<a> to be that same
+function.  For example, if we wanted to change the ~<<SIN>~ function so
+as to take its argument in degrees rather than radians, we might
+do so as follows:
+
+.examp
+\COPYSF(<<SINRAD>,$SIN)
+\ERASE($SIN)
+\$SIN(N)
+   [1]\SIN_SINRAD(N*PI/180)
+   [2]\$
+.apart skip 1 group
+\PI_3.141592653589793
+\SIN(90)
+1.
+.end
+
+.sec(The Meaning of NULL,meaningofnull)
+
+~@@<NULL,meaning of>~ is a somewhat artificial object
+included in PPL solely to formalize
+the notion of "no value".
+For example, when a function that returns
+no value is called, the resulting
+value is ~NULL~.  Thus, if ~F~ is such
+a function, the statement
+
+.examp
+\X_F(3)
+.end
+
+will cause the value ~NULL~ to be assigned
+to ~X~.  Generally, this value is never printed
+out unless specifically requested 
+in a direct printout or via ~TRACE~ (see {"Section!" stoptrace}).
+.xx NULL,printout,of
+
+For symmetry, ~NULL~ has its own data type,
+which is called ~@/<NONE,data type/>~, and is an atom;
+thus, 3NULL==ATOMIC1 is ~TRUE~, and the data
+definition
+
+.examp
+\$<<ATROW> = [1: ] <<ATOMIC>
+.end
+
+will allow instances of an ~ATROW~ to include
+elements which are ~NULL~.
+
+The value ~NULL~ will appear in the following cases:
+
+.begin indent 4,8 tabs 9,25
+a.\As the value of a non-value-returning
+.x function,null-value-returning
+procedure, i.e. a function during whose execution
+the procedure identifier is never assigned a value.
+
+b.\As the value of the @/<demand symbol,value/of blank line to> (?)
+if the user's response is a blank line (i.e.
+merely pressing the <<Return key>).
+Note that this is not true for such a
+response to the ~STRING~ demand symbol (?");
+in the latter case, a ~STRING~ of length
+zero will be returned, as might be expected.
+
+c.\As the value of a conditional of the form
+.xx IF form,value,of
+.begin nofill select 3
+\\IF !<b> THEN !<e>
+.end continue
+in which the expression !<b> evaluates to ~FALSE~.
+
+d.\As the value of any ~FOR~, ~WHILE~, or ~REPEAT~ form.
+.xx FOR form,value,of
+.xx WHILE form,value,of
+.xx REPEAT form,value,of
+.end
+
+One may test for equality with ~NULL~ just as
+with other atomic values.  However, ~NULL~ is
+not a legal operand to most built-in functions
+and operators.
+
+.sec(Built-In Functions for File I/O,fileio)
+.x file,input and output under program control
+
+Besides the functions for storing and retrieving entire
+programs and environments, described in {"Section!" saving},
+PPL also contains facilities for performing
+input and output on a character or line basis under program
+control.  The relevant built-in functions are as follows:
+
+.begin indent 0,16 tabs 17
+{fn(INPUT,c,s,m)}\Open the file described by the ~STRING~ !<s>
+on channel !<c> for input in mode !<m>.  !<c> is a small ~INT~eger from
+one to some arbitrary maximum (currently 13 in @@<PPL-10,file channel number limit> and 7 in @@<PPL-11,file channel number limit>)
+representing a <<channel number>.  This number is used to refer to that open file in
+all subsequent operations.  !<s> is a ~STRING~ describing the file
+.x filename
+in the usual way (see {"Section!" saving});  the default file extension
+is ~.PPL~.
+!<m>, if given, may be any atomic data type except ~NULL~
+.xx file,data type,of
+(i.e. ~INT~, ~REAL~, ~DBL~, ~BOOL~, or ~CHAR~), and specifies
+the data type of objects to be read from
+that file.  If the third argument is omitted in the call to ~INPUT~,
+~CHAR~ mode is assumed by default.  For special applications
+that require
+%%<non-standard/byte size>s, the third argument may also be an ~INT~eger
+in the range 1 to 36 specifying the byte size in bits.  In this
+case, the data type for that open file will always be ~INT~.
+(Non-standard byte sizes are implemented only in @@<PPL-10,non-standard byte size>
+at present).
+
+{fn(OUTPUT,c,s,m)}\Open the file described by !<s> on channel
+!<c> for output in mode !<m>.  The arguments are processed as for ~INPUT~.
+
+{fn(INBYTE,c)}\Read and return one byte through channel !<c>,
+which must previously have been open for input
+via a call to the ~INPUT~ function.  The data type of the
+object returned is as specified in the call to ~INPUT~.
+
+.x OUTBYTE
+3OUTBYTE(2c3,2b713,2b723,...,2b7n3)1 Write the data !<b>{sub(1)}, !<b>{sub(2)}, ...#!<b>{sub(n)}
+into the file open for output on channel !<c>.
+Each of the arguments must be of the type specified
+in the previous call to ~OUTPUT~ or an error will occur.
+
+{fn(INSTMT,c)}\Read a line of input through channel !<c>, which
+.x statement,reading from file
+must be open in ~CHAR~ mode, and translate and execute it in
+the environment of the call to ~INSTMT~ in exactly
+the same manner as the
+demand symbol (?).  If a
+@@<syntax error,in INSTMT> is detected in the line so read, the normal
+error message will be printed and a substitute line will
+then be requested from the user's console.
+
+{fn(INSTRING,c)}\Read a line of input through channel !<c>, which
+must be open in ~CHAR~ mode, and return it as a ~@@<STRING,reading from file>~
+in the manner of the
+~STRING~ demand symbol (?").
+
+.x PRINTF
+3PRINTF(2c3,2d713,2d723,...,2d7n3)1 Write 7ASCII* character representations
+of the data objects !<d>{sub(1)}, !<d>{sub(2)}, ...#!<d>{sub(n)} into the file on channel !<c>, which
+must be open for output in ~CHAR~ mode.  ~PRINTF~ is
+identical to
+~<<PRINT>~ in all other respects.  Note that
+function names (preceded by dollar signs) and
+data definitions are legal arguments to both ~PRINT~ and
+~PRINTF~, and will cause
+the appropriate definitions to be printed out or written.
+
+.x FORMATF
+3FORMATF(2c3,2s713,2s723,...,2s7n3)1 Perform formatted numeric
+output to the file on channel !<c>, which must be open in ~CHAR~ mode,
+in a manner identical to the ~<<FORMAT>~ function.
+
+{fn(EOF,c)}\Return ~TRUE~ or ~FALSE~ depending on
+whether or not the input file on channel !<c> is at end-of-file.
+Attempting to read past <<end-of-file> using
+~INBYTE~, ~INSTMT~, or ~INSTRING~ will result in an error.
+However, if {fn(EOF,c)} returns the value ~FALSE~, then
+the next call to ~INBYTE~, ~INSTMT~, or ~INSTRING~ will always
+succeed.
+
+.x CLOSE
+3CLOSE(2c713,2c723,...,2c7n3)1 Close the files on channels !<c>{sub(1)}, !<c>{sub(2)}, ...#!<c>{sub(n)},
+and dissociate the channel numbers from the files, thus
+freeing up the channel numbers for further use.  If ~CLOSE~
+is called with no arguments (i.e. just an empty set of parentheses),
+all open files (both input and output) are closed.  No error
+occurs if channels specified to be ~CLOSE~d are not in fact open.
+
+{fn(OPENED,c)}\Return ~TRUE~ or ~FALSE~ depending on whether
+or not a file is open (for either input or output) on channel !<c>.
+
+~<<FREE.CHANNEL>~\Return the number of the first free
+(unused) channel, or ~NULL~ if all available channels are
+in use.
+
+{fn(POSITION,c,p)}\Position the file on channel !<c>
+.see random access,POSITION
+so that the !<p>th byte of the file will be the first one
+read or written by the next I/O transfer operation.
+If !<c> refers to an input file and !<p> is greater than the size of the file in bytes,
+the {fn(EOF,c)} function will be set to return ~TRUE~ if it
+is called.
+~POSITION~ is implemented only for files on disk, and only for input
+files in the @@<DECsystem-10,restriction on POSITION> and @@<Unix,restriction on POSITION> versions of PPL.
+.end
+
+PPL mostly follows the file I/O conventions of the operating
+system under which it is running.  The following statements
+are generally true in all versions of PPL.
+A file may
+not be open for both input and output on the same channel at the
+same time.  Opening a file for output with the same name
+as an existing file causes a new file to be opened, and does not
+modify the existing file even after any number of ~OUTBYTE~s
+or other output commands.  Only when the new output file is
+~CLOSE~d does it
+supercede the old version of the file.  It is therefore
+possible to read the contents of the old copy of the file
+at the same time as the new one is being written on
+a different channel (or even after the new copy is ~CLOSE~d,
+so long as the old one is opened for input before the new
+one is ~CLOSE~d).  It is possible for any number of users to
+have a single file open for input on any number of channels
+at the same time.  However, a file may be open for output
+on only a single channel at a given time.
+
+When performing output, it is particularly important that
+the file be ~CLOSE~d before PPL is exited (via calls
+to ~<<SYS>~ or ~<<LOGOUT>~) or restarted (via 3<<ERASE>()1).
+Otherwise, the file may not be completely written.*<In fact,
+in the DECsystem-10 version of PPL, the new copy will
+disappear without a trace.>
+
+The foregoing comments apply only to files on disk.  Other
+devices are somewhat more restricted.  Further information
+should be obtained from the appropriate monitor reference
+manuals.
+
+In addition to the channels (1 through 7 or 13) available
+by calling the ~INPUT~ or ~OUTPUT~ functions, channel @@<zero,file channel number>
+refers to the controlling terminal and is always open for
+both input and output in ~CHAR~ mode.  The functions ~INBYTE~,
+~OUTBYTE~, ~INSTRING~, ~INSTMT~, ~PRINTF~, and ~FORMATF~ will operate
+in the normal way on channel 0.  ~EOF(0)~ will always return
+~FALSE~, ~OPENED(0)~ will always return ~TRUE~,
+and other functions do not allow a zero channel number.
+
+.sec(User-Defined Prompting Strings,prompting)
+.xx prompt string,assignment,of
+
+The prompts typed out by PPL to signal readiness for user
+input at the top level, at user suspension level, and at demand
+input level are subject to redefinition by the user.  PPL
+uses the values of the identifiers ~<<TOP.PROMPT>~, ~<<SUSPEND.PROMPT>~,
+and ~<<DEMAND.PROMPT>~ respectively in printing out prompts.
+The user may change, say, the demand-level prompt by assigning a new
+value (of type ~STRING~) to the identifier ~DEMAND.PROMPT~.
+The values of these variables in the initial state of the
+system (determining PPL's "normal" behavior) are as follows:
+
+.examp tabs 9,35
+\TOP.PROMPT_"        "\7[a single TAB]3
+\SUSPEND.PROMPT_"     S> "
+\DEMAND.PROMPT_"      ? "
+.end
+
+To completely suppress a prompt, simply assign it a null ~STRING~, i.e.
+
+.examp
+\DEMAND.PROMPT_""
+.end
+
+.sec(Special Functions,specialfns)
+
+This section describes special built-in functions that are available
+in only some versions of PPL or are otherwise restricted.
+.x PPL-10,special functions
+.x PPL-11,special functions
+
+The following functions have been included to facilitate
+<<partial-word processing> on PDP-10 word data.
+.x byte manipulation
+They are not implemented in PPL-11.
+
+.begin indent 0,16 tabs 17
+{fn(GETBYTE,f,l,i)}\From the integer !<i>, extract the !<f>th
+through the !<l>th bits, and return the resulting byte as an ~INT~.
+The bits are numbered 0 through 35 from left
+to right.
+
+{fn(PUTBYTE,b,f,l,i)}\Place the rightmost (!<l>-!<f>+1) bits of the
+~INT~eger !<b> into bit positions !<f> through !<l> of the ~INT~eger
+!<i>, and return the result as an ~INT~.
+.end
+
+The following functions perform single-character input/output
+to the terminal, with no editing, buffering, or other processing
+performed by the system.
+
+.begin indent 0,16 tabs 17
+~<<GETCHAR>~\Return as a ~CHAR~ the next character typed on the
+.x character-at-a-time transmission
+terminal by the user.
+
+{fn(SENDCHAR,c)}\Print the ~CHAR~acter !<c> on the terminal (!<c> may also
+be an ~INT~ and will be converted automatically by application
+of the {fn(CHAR,c)} function).
+.end
+
+
+While ~GETCHAR~ and ~SENDCHAR~ are not directly implemented in
+PPL-11, the ~SENDCHAR~ function can be obtained through the
+use of the following built-in function.
+
+.begin indent 0,16 tabs 17
+{fn(IMAGE.OUT,c)}\Print characters on the terminal in Unix
+"raw mode" which allows any 7ASCII* code to be transmitted.
+In addition to the ~CHAR~ and ~INT~ arguments described for
+~SENDCHAR~ above, ~IMAGE.OUT~ may also take a ~STRING~ argument,
+in which case all characters in the ~STRING~ are printed in
+this fashion.
+.end
+
+The following built-in functions are included in versions of
+PPL-10 running on systems with 7ARDS* storage-display terminals,
+.x ARDS terminal
+.x graphical function
+or any version in which the 7ARDS* conditional has been enabled.
+
+.begin indent 0,16 tabs 17
+~<<ARDMODE>~\Enter graphical input/output mode.
+
+~<<TTYMODE>~\Leave graphical input/output mode.
+
+{fn(SETPOINT,x,y)}\Set the beam to the given coordinates,
+where (0,0) is in the center and useful ranges are in the order of
+plus/minus 600.  ~SETPOINT~ does not intensify the beam.  To display
+a dot at the selected location, ~PRINT~ a
+period after performing the ~SETPOINT~ operation.
+
+{fn(SOLIDVEC,dx,dy)}\Draw a solid vector through the given
+displacement, starting at the current beam position.
+Neither !<dx> nor !<dy> should exceed 1023 in magnitude.
+
+{fn(DOTTEDVEC,dx,dy)} Draw a dotted vector through the given
+displacement, starting at the current beam position.
+.end
+
+The following example draws a 50-by-50 grid on the 7ARDS*
+screen:
+
+.examp
+\$<<GRID>; I
+   [1]\ARDMODE
+   [2]\FOR I_-500:20:500 DO SETPOINT(I,-500); SOLIDVEC(0,1000)
+   [3]\FOR I_-500:20:500 DO SETPOINT(-500,I); SOLIDVEC(1000,0)
+   [4]\TTYMODE
+   [5]\$
+.end
+
+The following function is available on the Harvard PDP-10
+only (under the 7SYLVN1 conditional).  It is for accessing
+the custom-built <<Sylvania tablet> and stylus connected to
+the 7ARDS* terminal.
+
+.begin indent 0,16 tabs 17
+~<<READSTYLUS>~\Interrogate the Sylvania tablet and store the
+!<x>, !<y>, and !<z> coordinates of the pen in variables called
+~<<XSTYLUS>~, ~<<YSTYLUS>~, and ~<<ZSTYLUS>~ respectively.
+The !<x> and !<y> coordinates are similar to those for 7ARDS*
+output;  the !<z> coordinate indicates height of the pen above
+the tablet, where 5 to 7 indicates pen off the surface, 4 indicates
+pen touching the surface, and 0 indicates pen pressed down.
+.end
+
+The following function tracks the pen with an "X" until it
+.x pen tracking
+is pressed down:
+
+.examp
+\$<<TRACK>
+   [1]\ARDMODE
+   [2]\READSTYLUS; SETPOINT(XSTYLUS,YSTYLUS)
+   [3]\IF ZSTYLUS>0 THEN PRINT("X"); GOTO %2
+   [4]\TTYMODE
+   [5]\$
+.end
+
+The two 7ARDS* screens and the write-through (non-storage)
+mode are selected via special control characters on the
+7ARDS* terminal connected to the Harvard PDP-10.
+The required character sequence is:
+
+.examp
+\PRINT(CHAR($35),'&,CHAR(!<n>),CHAR($34))
+.end
+
+where !<n> is taken as a 7-bit binary number whose bits have
+the following significance:
+
+.begin nofill tabs 9,21
+
+\$100\Required bit (i.e. must be set)
+\$40\Enables write-through mode
+\$2\Disables scope 2
+\$1\Disables scope 1
+.end
+
+The currently-selected screen(s) are erased by ~PRINT~ing
+a form feed (~CHAR($14)~).
+
+The following functions are included only in the Harvard
+version of PPL-10 (under the 7FTBAKG* conditional):
+
+.begin indent 0,16 tabs 17
+~<<BACKGROUND>~\Cause PPL to enter a background running mode
+whereby it runs only when no other PDP-10 time-sharing user's
+program wants to run.  This is useful for long-running
+compute-bound programs that seriously degrade other users' response
+on very small systems such as the Harvard PDP-10.  Background
+mode does not take effect until at least ten seconds of CPU
+time have elapsed since the most recent command or other response
+typed in by the user.
+
+~<<FOREGROUND>~\Cancel background mode.  PPL will compete
+for CPU time in the normal way.
+.end
+
+.sec(Further Information on PPL's Syntax,syntax)
+.x syntax
+
+In {"Chapter!" starting} we used such terms as !<expression>,
+!<form>, and !<statement> in a rather loose
+fashion.  These terms in fact have precise
+meanings which we shall explain now.
+A BNF formalization of PPL's syntax
+is given in {"Appendix!" appsyntax}.
+The explanation in this section is
+a simplified, English language presentation
+of the information to be found in the appendix.
+
+In the syntax of PPL, a !<term> is the
+.x term,in syntax
+most basic component of a statement.
+A term may be any of the following:
+
+.begin indent 4,8 tabs 9
+a.\An <<identifier> or <<constant>.
+
+b.\A term followed by a (possibly empty)
+argument list enclosed in @@<parentheses,enclosing argument list>; this
+denotes a function call.
+
+c.\A term followed by a subscript list
+enclosed in @@<square brackets,enclosing selector>; this denotes a <<selection> operation.
+
+d.\A (possibly empty) list of forms enclosed in
+@@<square brackets,enclosing TUPLE>; this denotes the construction of a ~<<TUPLE>~.
+
+e.\Any form enclosed in @@<parentheses,enclosing form>.
+.end
+
+An !<expression> is a collection of one or more
+.x expression,in syntax
+terms connected by zero or more unary and binary operators.
+More precisely, an expression is
+
+.begin indent 4,8 tabs 9
+a.\A unary operator followed by an expression.
+
+b.\An expression, followed by a binary operator, followed
+by another expression.
+
+c.\A term not adjacent to an operator.
+.end
+
+Thus, an expression is similar to what we consider
+to be an 'algebraic expression' in mathematics.
+The order of evaluation of expressions is determined by
+the relative <<precedence> of the unary and binary operators involved.
+It is interesting to note that the syntax of
+PPL before version 40 consisted only of
+terms and expressions as explained above.
+
+A !<form> may be any of the following constructions:
+.x form,in syntax
+
+.begin indent 4,8 tabs 9
+a.\The word ~<<GOTO>~ followed by an expression.
+
+b.\The word ~<<RETURN>~, optionally followed by an expression.
+
+c.\An expression, followed by a @@<semicolon,separating multiple expressions>, followed by
+a form.
+
+d.\The word ~IF~, followed by an expression,
+.x IF form
+followed by the word ~<<THEN>~, followed by a form,
+optionally followed by ~<<ELSE>~ and another form.
+
+e.\The word ~FOR~, followed by two or three expressions
+.x FOR form
+separated by @@<colon,separating FOR control elements>s, followed by the word ~<<DO>~, followed
+by a form.
+The first expression after the ~FOR~ must contain
+'_' as its principal operator.
+.xx FOR form,assignment operator,in
+
+f.\The word ~WHILE~, followed by an expression, followed by the
+.x WHILE form
+word ~DO~, followed by a form.
+
+g.\The word ~REPEAT~, followed by a form, followed by the word ~<<UNTIL>~,
+.x REPEAT form
+followed by an expression.
+
+h.\Any expression not in one of the above contexts.
+.end
+
+Thus, forms include conditionals, ~FOR~, ~REPEAT~, and ~WHILE~ forms,
+and the constructions we have been referring to as
+'%<multiple/expression>s' (separated by semicolons).
+
+Finally, a !<statement> is the highest-level
+.x statement,in syntax
+object in PPL's syntax;  the statement is
+the smallest unit of interaction with the user
+(i.e. PPL will perform computation for the user
+only when he has input a complete statement).
+A statement is one of the following:
+
+.begin indent 4,8 tabs 9
+a.\A form followed by a Return.
+.x Return key
+This is the most common statement in PPL.
+
+b.\The word ~FOR~, followed by two or three
+expressions separated by colons, followed by the word
+~<<DOTHRU>~, followed by an expression designating
+the line at the end of the scope, followed by a Return.
+This is the
+!<FOR statement> introduced in {"Section!" forstmt}.
+.x FOR statement
+
+c.\A Return.  Thus, a @/<blank line,value/of>
+is a legal PPL statement
+which has the value ~<<NULL>~.
+.end
+
+Any statement appearing as a step within a user-defined
+function may optionally be preceded by one or more <<label>s,
+where a label is an identifier immediately followed
+by a @@<colon,delimiting label> (see Secion 3.5).
+
+The user will note that the foregoing definition
+of the syntax of PPL permits constructions
+such as
+
+.examp
+\A_3+(IF Y=0 THEN 4.1*SIN(X) ELSE P(Y))/17.5
+.end
+
+since (1) the ~IF~ construction is a form, (2)
+any form contained within parentheses is a term,
+and (3) a term may be combined into an expression
+with operators, etc.  This example is quite legal
+and has a well-defined meaning.
+
+In most cases, the value of a form is the value of the last expression
+.xx form,value,of
+executed within that form.  Thus, an ~IF~ form has
+as its value the ~THEN~ clause or the ~ELSE~ clause,
+depending on the value of the ~BOOL~ean
+expression after the ~IF~.  (As explained in {"Section!" meaningofnull},
+the value is ~NULL~ if the condition evaluates to ~FALSE~
+and there is no ~ELSE~ part).
+Similarly, the value of any multiple form (composed with semicolons)
+is the value of the last form executed within it.
+However, the value of iteration forms (~FOR~, ~WHILE~, and ~REPEAT~) is
+always ~NULL~.
+
+This generality of the syntax allows statements
+of considerable power to be compressed into
+very little actual text.  For example, the following
+is another version of the familiar factorial function:
+
+.examp
+\$<<FACT>(N)
+   [1]\FACT_(IF N<1 THEN 1. ELSE N*FACT(N-1))
+   [2]\$
+.end
+
+There is no way for this manual to enumerate
+all the possible variations of the syntax;
+thus, the interested user is urged to experiment.
+We might note that nested forms enclosed in
+parentheses may be used almost everywhere;
+this is particularly useful in the case of nested ~IF~
+forms.  For example,
+the following statements will work exactly as intended:
+.xx IF form,nesting,of
+
+.examp
+\(IF Y=0 THEN P ELSE Q) _ C[IF N=1 THEN RP ELSE IP]
+\R_(IF B THEN F ELSE G)(X)
+.end
+
+In the interest of conciseness, PPL
+provides a number of alternative notations
+for commonly used forms.  The following table
+lists the correspondences:
+
+.examp
+.tabs 9,41
+.x IF form,alternative notation
+.x FOR form,alternative notation
+.x GOTO,alternative notation
+\IF !<b> THEN !<e>\!<b> => !<e>
+\IF !<b> THEN !<e>{sub(1)} ELSE !<e>{sub(2)}\b => !<e>{sub(1)} :: !<e>{sub(2)}
+\IF !<b> THEN GOTO %!<n>\!<b> --> %!<n>
+\GOTO %!<n>\--> %!<n>
+\FOR !<v> _ !<i>:!<s>:!<f> DO !<e>\!<v> _ !<i>:!<s>:!<f> ; !<e>
+\FOR !<v> _ !<i>:!<s>:!<f> DOTHRU %!<n>\!<v> _ !<i>:!<s>:!<f> ;; %!<n>
+.end
+
+The '-->' operator is associated with two built-in
+.x goto operator
+.x operator,goto
+functions:  {fn(UGOTO,n)} (for "&<unconditional/goto operator> goto")
+and {fn(CGOTO,b,n)} (for "&<conditional/goto operator> goto").
+'-->' is in all respects an ordinary unary and binary operator,
+defined with very low precedence (see the table in {"Section!" precedence}).
+.xx goto operator,precedence,of
+It is provided primarily for compatibility with older versions of PPL.
+
+As an example of a rather extreme overuse
+of PPL's concise syntax features,
+we present the following definition of ~<<DERIV>(F,X)~.
+This function behaves identically to the one defined
+in {"Section!" formula};  observe, however, that
+we have succeeded in making the function
+almost totally unreadable.  Further, it is more difficult
+to debug (using the stop/trace feature) and to edit,
+since these facilities are essentially line-oriented.
+Thus, PPL leaves it up to the user to decide
+the tradeoffs between conciseness, convenience, and
+readability.
+
+.examp
+.tabs 9,12,15,18,21,24
+\$DERIV(F,X)
+   [1]\DERIV_ ( %
+\\F==ATOM => (F=X => 1 :: 0) :: %
+\\F==UF => UF(F[OP],F[RO]\X) :: %
+\\F==BF => ( %
+\\\F[OP]='+ => F[LO]\X + F[RO]\X :: %
+\\\F[OP]='- => F[LO]\X - F[RO]\X :: %
+\\\F[OP]='* => F[LO]*F[RO]\X + F[RO]*F[LO]\X :: %
+\\\F[OP]='/ => (F[RO]*F[LO]\X - F[LO]*F[RO]\X)/ %
+\\\\(F[RO]*F[RO]) ) :: %
+\\"IMPROPER ARG TO DERIV")
+   [2]\$
+.end

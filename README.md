@@ -1,7 +1,7 @@
 ### Polymorphic Programming Language (PPL)
 
-These files comes from the \[PPL,MWK] directory on the Stanford AI Lab
-PDP-10.
+These files comes from the \[PPL,MWK] and \[PPL,SYS] directories on
+the Stanford AI Lab PDP-10.
 
 MWK is Mark Kahrs, and here is his recollection on why he made a copy
 and why the files seem tailored for TENEX:

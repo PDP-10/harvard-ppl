@@ -1,0 +1,118 @@
+
+	C. Corrections to the PPL User's Manual.
+
+	Page	Section	Correction
+	----	-------	----------
+	  3	 1.4	"Louis Lasher" should be spelled "Lew Lasher"
+						-- L. L.
+	 24	 3.6	The manual does not make it clear that comments
+		 3.7	do not extend from one continuation line to the
+			next.  It is, in fact, possible to place a comment
+			(terminated with % <NEWLINE>) between any 2 lexemes.
+			Also, the 500-character limit for a PPL statement
+			does not exist in PPL-11.
+	 33	 4.7.1	In specifying a range for a "character-editor"
+			command, one types [1:5], NEVER [1,5].
+	 51	 6.3	The operator-related functions are now available.
+	 68	 7.1	Backtrace is now available.
+	 68	 7.2	All the environmental inquiry functions are
+			available, as is the class function and its
+			family.  There is an additional class (and
+			predicate) called compiled.fn (guess why?).
+	 74	 7.5	Execute is now available, but in PPL-11, text
+			after a <NEWLINE> character is ignored.
+	 79	 7.9	In line 4, NULL appears instead of NONE.
+	 81	 7.10	Additionally, the user can change the prompt used
+			in the character editor (edit.prompt) and the
+			symbol used to show the current character position
+			(char.pointer).
+	 81	 7.11	Getchar is now available.
+	 93	App. A	Most of the "11" subscripts should be
+			removed.
+			The exec function always returns a boolean
+			value: TRUE if the called program exited
+			"normally" (I.E. with exit status 0) and FALSE
+			otherwise.
+			The functions allow.write, disallow.write,
+			allow.duplicates, and disallow.duplicates
+			should be included.
+
+			(DIS)ALLOW.WRITE
+				IN PPL-11, AFTER DOING A PURGE(),
+				ONE IS NOT ALLOWED TO WRITE TO A FILE.
+				(THIS IS FOR THE USER'S PROTECTION).
+				HOWEVER, IF THE USER REALLY WANTS TO,
+				(S)HE CAN TYPE:
+					ALLOW.WRITE
+				WHICH THEN ALLOWS WRITE'S TO A FILE
+				TYPING:
+					DISALLOW.WRITE
+				PREVENTS ONE FROM WRITING OUT TO A FILE
+
+			(DIS)ALLOW.DUPLICATES
+				IN PPL-11, ONE CAN READ THE SAME
+				FUNCTION IN TWICE (E.G., ONE CAN READ IN
+				THE SAME FILE TWICE) IF ONE FIRST TYPES:
+					ALLOW.DUPLICATES
+				(PPL'S INITIAL ASSUMPTION IS NOT TO ALLO
+				THIS.)  ON RE-READING PROGRAMS OR DATA
+				DEFINITIONS, PPL TYPES WARNING MESSAGES:
+
+					BLURFO: SUPERCEDING OLD FUNCTION
+					ITEM: OLD DATA TYPE UNCHANGED
+				TO DISALLOW READING IN THE SAME FUNCTION
+				TWICE, TYPE:
+					DISALLOW.DUPLICATES
+
+	D. Summary of differences between PPL-11 and PPL -10.
+
+	1. PPL-10 has the functions printstr, formatstr, mstring, putbyte,
+	   getbyte, sendchar, background, foreground, and the special functions
+	   for the ARDS terminal; PPL-11 does not (although it has image.out,
+	   which is pretty similar to sendchar).
+
+	2. PPL-10 allows user-defined variadic functions; PPL-11 does not.
+
+	3. PPL-11 has the intra-line editor described in section 4.7 of
+	   the PPL User's Manual; PPL-10 has a character-by-character editor
+	   (See Appendix H-4 in the manual.)
+
+	4. PPL-11 has a compiler.
+
+	5. In PPL-11, continuation lines are signalled by %<NEWLINE>; in
+	   PPL-10, by <LINEFEED>.  Furthermore, in PPL-11, a comment ends
+	   at the %<NEWLINE>; in PPL-10, a comment always extends across all
+	   continuation lines.
+
+	6. In PPL-11, it is possible to display a range of lines of a function;
+	   not in PPL-10.
+
+	7. In PPL-10, statements cannot be longer than 500 characters, in
+	   PPL-11 there is "no limit".
+
+	8. In PPL-10, strings can be used in place of data types or functions
+	   in the functions make, unary, and binary.
+
+	9. In PPL-10, the function logout logs the user out.  In PPL-11, it
+	   simply tells the user how to logout.
+
+       10. PPL-10 allows file I/O in non-standard byte sizes.  PPL-11 does
+	   not, but allows I/O in "almost any" data type.
+
+       11. PPL-11 has the functions exec, purge, stacks, image.out,
+	   protocol, (dis)allow.write, (dis)allow.duplicates, mstring,
+	   abs, tan, and log; PPL-10 does not.
+
+       12. PPL-10 allows REALs or DBLs as arguments to the functions
+	   and and or (sic); PPL-11 does not.
+
+       13. The functions read, execute, and identical work slightly
+	   differently in the two versions.
+
+       14. If you type
+		class(3)
+	   PPL-10 will return the null string and PPL-11 will return
+	   "variable".  But class(a), where a is a local variable, works
+	   properly only in PPL-11.
+
+       15. In PPL-11, the argument to the random function is ignored.

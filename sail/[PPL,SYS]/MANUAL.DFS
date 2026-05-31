@@ -1,0 +1,315 @@
+. << manual.dfs -- definition file for PPL manual >>
+. << adapted from <TAFT>EATDFS.PUB >>
+.
+.macro setfont 
+.font 1 "timesroman10"
+.font 2 "timesroman10i"
+.font 3 "gacha10"
+.font 4 "timesroman10b"
+.font 5 "timesroman12b"
+.font 6 "helvetica18b"
+.font 7 "timesroman8"
+.font 8 "hippo10"
+.select 1
+.setframe(1,69,1,60)
+.evenleftborder_1400; oddleftborder_1500;
+. 
+.
+.turn on "#{\"
+.turn on "" for "%"
+.
+.macro setframe(l,r,t,b) 
+.!lmarg _ l; !rmarg _ r; !top _ t; !bottom _ b
+.page frame !rmarg wide !bottom high
+.area text lines !top+4 to !bottom chars !lmarg to !rmarg
+.place text
+.title area heading lines !top to !top+2 chars !lmarg to !rmarg
+. 
+.
+.before page  
+.after page  if page neq null and not firstpageinchap then begin
+.nofill preface 0 indent 0,0,0 select 1 ; spread_1;
+.place heading
+.if even page then start <<left-hand page>>
+{page!~    7{ (^chaptername) ~1{ sectionnumber ~
+.end else start <<right-hand page>>
+{ sectionnumber ~7{ (^sectionname) ~1    {page!~
+.end
+.end;
+.firstpageinchap _ false;
+. 
+.
+.chaptername _ null; sectionname _ null; sectionnumber _ null;
+.firstpageinchap _ true;
+.
+. << sectioning macros:  hierarchy is chapter, section, subsection >>
+.
+.count page to 999
+.count chapter to 99
+.count section to 99 in chapter printing "!.1"
+.count subsection to 9 in section printing "!.1"
+.
+.macro chap(str,label) 
+.next page
+.righthandpage
+.if "label"=null then next chapter else step(chapter!,label);
+.begin center
+5{!~.  str
+.end
+.chaptername _ "str"; sectionname _ "str"; sectionnumber _ ! & ".";
+.firstpageinchap _ true;
+.send contents 
+.if lines<6 then next page
+.skip 1
+{!~. str
+. 
+.cref(label, ! & ". str")
+. 
+.
+.macro sec(str,label) 
+.if lines<4+3*spread then next page
+.if "label"=null then next section else step(section!,label);
+.skip 1+spread
+.begin nofill
+.if xcribl then select 4;
+{!~.  str
+.end
+.sectionname _ "str"; sectionnumber _ !;
+.send contents 
+\{!~. str\\{ (dots[1 to (!rmarg-!lmarg-char-5)*2/3]) ~{page!~###
+. 
+.cref(label, ! & ". str")
+. 
+.
+.macro ssec(str,label) 
+.if lines<4+3*spread then next page
+.if "label"=null then next subsection else step(subsection!,label);
+.skip 1+spread
+.begin nofill
+.if xcribl then select 4;
+{!~.  str
+.end
+.sectionname _ "str"; sectionnumber _ !;
+.send contents 
+\\{!~. str\\{ (dots[1 to (!rmarg-!lmarg-char-5)*2/3]) ~{page!~###
+. 
+.cref(label, ! & ". str")
+. 
+.
+. << similar sectioning macros for appendices >>
+.
+.count appendix to 26 printing "A"
+.count asection to 9 in appendix printing "!.1"
+.
+.macro app(str,label,pageflag) 
+.next page
+.righthandpage
+.if "label"=null then next appendix else step(appendix!,label);
+.begin center
+5Appendix {!~.  str
+.end
+.chaptername _ "str"; sectionname _ "str";
+. sectionnumber _ "7APPENDIX* " & ! ;
+.firstpageinchap _ true;
+.if "pageflag"=null then start
+.  send contents 
+.    if lines<6 then next page
+.    skip 1
+Appendix {!~. str
+.  
+.end else start
+.  send contents 
+.    if lines<6 then next page
+.    skip 1
+Appendix {!~. str\\{ (dots[1 to (!rmarg-!lmarg-char-5)*2/3]) ~{page!~###
+.  
+.end
+.cref(label,"Appendix " & ! & ". str")
+. 
+.
+.macro asec(str,label) 
+.if lines<4+3*spread then next page
+.if "label"=null then next asection else step(asection!,label);
+.skip 1+spread
+.begin nofill
+.if xcribl then select 4;
+{!~.  str
+.end
+.sectionname _ "str"; sectionnumber _ !;
+.send contents 
+\{!~. str\\{ (dots[1 to (!rmarg-!lmarg-char-5)*2/3]) ~{page!~###
+. 
+.cref(label, ! & ". str")
+. 
+.
+. << same as "chap" except doesn't do any counting >>
+.macro nchap(str) 
+.next page
+.righthandpage
+.begin center
+5str
+.end
+.chaptername _ "str"; sectionname _ "str"; sectionnumber _ null;
+.firstpageinchap _ true;
+.send contents 
+str{ (if char<15 then "(15)\\" else "\\");
+. (dots[1 to (!rmarg-!lmarg-char-5)*2/3]) ~{page!~###
+.  
+.
+.recursive macro step(counter,label)  label: next counter 
+.
+.macro righthandpage 
+.if even page then begin
+.  after page  
+.  next page
+.end; 
+.
+. << send label and description to symtab for cross-reference >>
+.macro cref(label,description) 
+.if "label" neq null then start
+.send symtab 
+
+{ (^"label") ~\description
+. 
+.end 
+.
+.macro single space  spread_1; setpreface; 
+.macro double space  spread_2; setpreface; 
+.macro setpreface 
+.if filling then start
+.  preface spread
+.end else start
+.  fill preface spread nofill
+.end; 
+.
+.count footnote inline to 9 in page
+.footsep _ "-------------------------"
+.footgap _ 1
+.at "*<" entry ">"  next footnote
+.send foot  preface 1; spread_1; indent 0,0,0; if xcribl then select 7;
+.  turn on "{^[]"
+^[{!~]{ turn off; ~entry
+.  break 
+.turn on "{^[]"
+7^[{!~]*{
+.turn off;
+. 
+.
+.macro ref(n) 
+.turn on "[{^]"; ~7^[[{ "n" ~]]*{ turn off;
+. 
+.
+.macro italic(str) 
+.if xcribl then start
+2str*{
+.end else start
+.  ~str{  <<really want to underline but too much confusion>>
+.end; 
+.
+.at "!<" str ">"  italic(|str|) 
+.
+. << indexing macros and responses >>
+.
+.macro x(generic,specific) 
+.send index ~<genericspecific>{page!~%{ 
+. 
+.macro see(a,b,c) 
+.if "c" neq null then start
+.  send index ~<ab>2{~see* c%{ 
+.end else start
+.  send index ~<a>2{~see* b%{ 
+.end; 
+.macro xx(generic,specific,prep) 
+.if "prep" neq null then start
+.  x(|generic|,|specific prep|) ; x(|specific|,|prep generic|) ;
+.end else start
+.  x(|generic|,|specific|) ; x(|specific|,|generic|) ;
+.end ; 
+.
+.at "<<" entry ">"  "entry" ; x(|entry|) ; 
+.at "%<" specific "/" generic ">" 
+.if "specific" neq null then start
+.  ~specific { x(|specific generic|) ;
+.end ; ~generic{ x(|generic|,|specific|) ;
+. 
+.at "%%<" specific "/" generic ">" 
+.if "specific" neq null then "specific " ;
+. "generic" ; x(|generic|,|specific|) ;
+. 
+.at "&<" specific "/" generic ">" 
+. "specific" ; x(|generic|,|specific|) ; x(|specific generic|)
+. 
+.at "&&<" specific "/" generic ">" 
+. "specific" ; x(|generic|,|specific|) ;
+. 
+.at "@<" generic "," specific ">" 
+. "generic" ; x(|generic|,|specific|); x(|specific generic|) ;
+. 
+.at "@@<" generic "," specific ">" 
+. "generic" ; x(|generic|,|specific|) ;
+. 
+.at "%/<" specific "/" prep "/" generic ">" 
+. "specific prep generic" ; xx(|generic|,|specific|,|prep|) ;
+. 
+.at "&/<" specific "/" prep "/" generic ">" 
+. "specific" ; xx(|generic|,|specific|,|prep|) ;
+. 
+.at "@/<" generic "," specific "/" prep ">" 
+. "generic" ; xx(|generic|,|specific|,|prep|) ;
+. 
+.
+.pi_"8p*"  << handy string constant to print character "pi" >>
+.
+.
+. << formatting macros >>
+.
+.macro examp  << matching "end" required to terminate scope >>
+.begin skip 1 nofill group select 3 tabs 9,17
+. 
+.
+.macro twocols(middle,nlines,sep) 
+.skip 1
+.if lines<nlines then next page ;
+.if "sep" neq null then !sep_"sep" else !sep_5 ;
+.begin
+.  title area leftcol chars !lmarg to !lmarg+middle-!sep
+.    lines topline+line to topline+line+nlines-1
+.  title area rightcol chars !lmarg+middle to !rmarg
+.    lines topline+line to topline+line+nlines-1
+.  place leftcol
+.  !bottomline_!topline_line;
+. 
+.
+.macro goleft 
+.break; if line > !bottomline then !bottomline_line;
+.place leftcol
+. 
+.
+.macro goright 
+.break; if line > !bottomline then !bottomline_line;
+.place rightcol
+. 
+.
+.macro endcols 
+.  break
+.  if line > !bottomline then !bottomline_line;
+.end
+.group skip !bottomline-!topline
+. 
+.
+.macro sub(str)  turn on "[]"; "7[str]*" ; turn off ; 
+.macro super(str)  turn on "^[]"; "7^[str]*" ; turn off ; 
+.
+.macro fn(name,a1,a2,a3,a4)  x(|name|);
+3{~name{
+.if "a1" = null then "1" else start
+(2{~a13{
+.  if "a2" neq null then start ~,2{~a23{ end
+.  if "a3" neq null then start ~,2{~a33{ end
+.  if "a4" neq null then start ~,2{~a43{ end
+)1{ end
+. 
+.
+.at "$" name "$"  ~3{~name*{ 
+.
+                                                                                                                                                                                                                                                                                                         

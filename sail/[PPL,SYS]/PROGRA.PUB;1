@@ -1,0 +1,501 @@
+.chap(Writing Programs in PPL,programs)
+
+All examples of PPL commands up to now have been
+in the form of !<direct statements>, that is,
+statements typed in by the user for immediate
+execution.  Although PPL allows single statements
+of considerable complexity, through the use of ~FOR~, ~IF~, ~WHILE~, and ~REPEAT~
+.x FOR form
+.x IF form
+.x WHILE form
+.x REPEAT form
+forms, this mode of operation is really
+useful only for desk-calculator type computations.
+
+We now consider the writing of !<programs>.  A <<program>
+is simply a sequence of PPL statements typed in by the user
+and stored to await later execution.
+Subsequently,
+we can command PPL to execute these statements.
+
+.sec(User-Defined Functions,functiondef)
+
+PPL allows the user to define his own
+functions in such a way that they may be called
+in exactly the same manner as the built-in
+functions described in {"Section!" functioncalls}.
+Function definition is the means by which a set
+.x function definition
+.x definition,function
+of PPL statements may be stored for later execution.
+
+A user-defined function consists of a
+!<function header> and a set of numbered statements
+.x function header
+.x header,function
+comprising the !<body> (executable part) of the function.
+.x function body
+.x body,function
+As these statements are typed in, PPL stores
+them away rather than executing them immediately.
+
+The following example will be used
+to explain the mechanics of function definition.
+The defined function, called ~<<FACT>~, takes a single
+~INT~eger argument !<n> and computes !<n> <<factorial>.
+!<n> factorial (abbreviated !<n>! in mathematics)
+is simply the product of all the positive integers
+less than or equal to !<n>.
+This, of course, is a simple thing to do in 
+direct PPL statements; for example, we could compute
+ten factorial as follows:
+
+.examp
+\TENFAC_1
+\FOR I_1:10 DO TENFAC_TENFAC*I
+\TENFAC
+3628800
+.end
+
+However, if we then wanted to compute the factorial
+of each of a large set of different integers,
+we would have
+to repeat the above statements each time.
+What we really want to do is define the function
+~FACT~ in such a way that calling it will deliver
+the desired results; for example:
+
+.examp
+\FACT(10)
+3628800
+.end
+
+This may be done through the following !<function
+definition>:
+
+.examp
+\$FACT(N); I
+   [1]\FACT_1.0
+   [2]\FOR I_1:N DO FACT_FACT*I
+   [3]\$
+.end
+
+The first line of the definition begins
+with a @@<dollar sign,signalling function definition>.  This is a signal to PPL that
+what is being typed is a definition rather than
+an executable statement.
+After the dollar sign is the name of the @/<function,name/of>
+(~FACT~), which may be any legal identifier
+that has not previously been defined.
+Within the body of the function, this name
+(referred to as the !<procedure identifier>)
+is used as a simple variable which represents
+the value of the function; during execution,
+the last value assigned
+.xx procedure identifier,assignment,to
+to the %<procedure/identifier> (by
+a statement of the form 3FACT#_#2e1)
+will be the value of the function call (e.g. 3FACT(10)1#).
+
+Following the procedure identifier appears
+the !<dummy argument list> enclosed in @@<parentheses,enclosing dummy arguments>.
+Each %<dummy/argument> is an identifier.  If more than
+one dummy argument is listed, the arguments are
+separated by @@<comma,separating dummy arguments>s.  If the function takes no
+arguments, the parentheses are omitted.  Dummy
+arguments are used within the body of the function
+to refer to the
+values of the corresponding arguments specified
+when the function is called.
+
+The last part of the function header
+is a list of !<local variable names>.  These are separated
+.x local variable
+.x variable,local
+from the rest of the header by a @@<semicolon,preceding local variables>;  if
+more than one local exist they are separated by @@<comma,separating local variables>s or semicolons.
+These variables are called !<local> because their
+names are accessible only within the body of
+the function in which they are defined.  Thus, within
+the sample function ~FACT~, the variable ~I~
+is a local.  It is entirely separate from any meaning
+the identifier ~I~ may have either within other functions
+or in the %<global/environment> (in which control
+resides when PPL is started).  The use
+of locals is an effective means of avoiding name
+conflicts between identically-named variables
+in different functions.
+
+The dummy arguments (sometimes known
+as !<formal parameters>) may also be treated as locals,
+.see formal parameter,dummy argument
+.see parameter,argument
+in the sense that they are accessible only
+within the function that uses them.  Formal parameters
+and locals differ in one respect, however.  Whereas
+formals are initialized with the &/<value/of/dummy argument>s of the
+calling arguments when the user function is entered,
+locals initially have no &/<value/of/local variable>.  This is true
+on each function entry no matter how many times
+the same function is called.  The @/<procedure identifier,value/of> is likewise unassigned on entry.
+
+The function header line is terminated normally,
+by pressing the <<Return key>.  PPL now responds
+by typing 3[1]1, indicating that it is prepared
+to accept the first statement of the function.
+PPL statements may be typed in this manner on
+successive lines, with the %<line/number>s supplied
+automatically by PPL.
+In this case, we type in the two statements required
+to compute !<n> factorial, much as we typed in direct
+statements to compute ten factorial, except that PPL
+does not !<execute> these statements but rather !<stores>
+them away for later execution.
+(We have made one minor modification to the algorithm:
+namely, we initialize ~FACT~ to the ~<<REAL>~ value 1.0 rather
+than to the ~<<INT>~eger value 1; this is because
+factorials can be very large, and a ~REAL~ is capable
+of storing much larger numbers than an ~INT~.
+Further information about PPL's handling
+of numbers will be presented in {"Section!" morenumbers}.)
+
+The @<function definition,closing> is !<closed> by typing in
+a line containing only a @/<dollar sign,closing function/with>.  This indicates the
+end of the definition, and PPL responds by
+skipping a line and moving
+eight spaces from the left margin.
+
+Now that the &<function/call> has been defined, it
+may be called:
+
+.examp
+\FACT(3)
+6.
+\FACT(10)
+3.6288E+06
+\25+FACT(FACT(4))
+6.204484E+23
+.end
+
+In the first example above, the call of
+the function ~FACT~ takes place as follows.
+The argument (3) is evaluated and assigned as
+the value of the formal parameter ~N~ within
+.xx dummy argument,assignment,to
+the function being called.  Control is then passed
+to statement [1] of ~FACT~.
+
+Unless otherwise directed, PPL executes
+.xx function,execution order,of
+statements within the function in numerical
+order.  Thus, statements [1] and [2] are
+executed.  Upon finishing statement [2], PPL
+attempts to execute statement [3], which does not
+exist (note that statement [3] is !<not> a line
+containing a dollar sign;  the dollar sign was simply
+a command to close the function definition).
+By convention, execution of a user-defined
+function is terminated whenever an attempt is
+made to execute a nonexistent statement.
+
+When a function terminates or !<returns>,
+.xx function,return,from
+the currently-assigned value of the procedure
+identifier (~FACT~) is taken as the value
+of the function and substituted in the
+.xx function call,value,of
+calling expression.  If the procedure identifier
+was never assigned a value during the execution
+of the @<function,null-value-returning>, the value returned is a special constant
+called ~NULL~ (which does not print out under ordinary circumstances).
+
+.sec(GOTO and RETURN,gotos)
+
+To allow the programmer to modify the sequence in which
+statements in a function are executed, PPL provides two
+program control statements called ~<<GOTO>~ and ~<<RETURN>~.
+The ~GOTO~ statement, which is written in the form
+
+.examp
+\GOTO %!<n>
+.end
+
+where !<n> is an integer statement number,
+causes PPL immediately to transfer control and resume execution
+starting at statement [!<n>].
+
+The ~RETURN~ statement causes the function to terminate immediately,
+as if the last statement of the function had just been executed.
+The word ~RETURN~ may optionally be followed by an expression, i.e.
+in the form
+
+.examp
+\RETURN !<e>
+.end
+
+in which case the value of the expression !<e> is assigned to the
+procedure identifier before the function returns (making it be
+the value of the @/<function call,value/of>).
+
+As an example of the use of both ~GOTO~ and ~RETURN~, we shall define
+a procedure called ~<<EUCLID>~ which takes two positive ~INT~eger
+arguments and computes their %<greatest common/divisor> (gcd) using
+.see gcd,greatest common divisor
+Euclid's algorithm:
+
+.examp
+\$EUCLID(M,N); R
+   [1]\R _ M-N*IDIV(M,N)
+   [2]\IF R=0 THEN RETURN N
+   [3]\M_N; N_R; GOTO %1
+   [4]\$
+
+\EUCLID(10,25)
+5
+\EUCLID(29,37)
+1
+\EUCLID(544,119)
+17
+.end
+
+In statement [1], we compute the remainder from dividing ~M~ by ~N~
+(using the built-in function {fn(IDIV,a,b)}, described in
+{"Section!" conversion}, which always gives an ~INT~eger
+result if the arguments are both of type ~INT~).
+In statement [2], if this remainder is zero,
+then ~N~ is the desired greatest common divisor, so we return it
+as the value of the function.  Otherwise, we continue to statement [3],
+where we perform assignments to convert the problem into that of
+finding the gcd of ~N~ and ~R~ and then go back to statement [1].
+
+Note that the referenced line number is preceded by a @@<percent sign,introducing relocatable line number>.
+This means 'relocatable line 1', and, as we shall see, comes in very
+.x relocatable line number
+.x line number,relocatable
+handy if we later have to edit the function (discussed in
+{"Section!" textedit}).  However, statement [3] could just as well
+have been written as
+
+.examp
+   [3]\M_N; N_R; GOTO 1
+.end
+
+except that the number '1' would no longer be relocatable
+(i.e. subject to automatic correction by PPL when statements
+of the function are renumbered).  It is a good idea, therefore,
+to get into the habit of using a percent sign before all line
+number references.
+
+.sec(FOR Statements,forstmt)
+
+Besides the ~FOR~ !<form> already discussed,
+.x FOR form
+whose scope is at most the rest of the statement, PPL
+also provides the ~FOR~ !<statement>, whose &/<scope/of/FOR statement>
+.x FOR statement
+may extend over one or more other statements in a function.
+The ~FOR~ statement is written in the following format:
+
+.examp
+   [!<k>]\FOR !<v> _ !<i> : !<s> : !<f> <<DOTHRU> %!<n>
+ [!<k>+1]\       . . . .
+\        . . . .
+   [!<n>]\         . . . .
+.end
+
+Whenever a ~FOR~ statement is encountered during execution,
+it causes the statements !<k>+1 through !<n> to be executed
+repeatedly for each successive value of the controlled variable !<v>.
+
+There are a few rules that must be followed when using the ~FOR~
+statement.  First, it must stand alone on a single line; i.e.
+the statement
+
+.examp
+\IF X=3 THEN FOR I_1:10 DOTHRU %7
+.end
+
+is illegal (though, as usual, the quantities
+!<v>, !<i>, !<s>, !<f>, and !<n> may be arbitrary expressions).
+Second, by its very nature, the ~FOR~ statement
+is legal only as a statement of a function; i.e.
+it must be a !<stored> statement, and may not be typed in
+for immediate execution.  Finally, the scope of the ~FOR~
+statement must be non-empty; that is, !<n> must be greater
+than !<k>.
+
+Just to illustrate the use of the ~FOR~ statement,
+we shall define another factorial function called ~<<FACT2>~,
+which differs from ~FACT~ ({"Section!" functiondef}) only in that the iteration
+is spread over two statements by the use of a ~FOR~ statement.
+
+.examp
+\$FACT2(N); I
+   [1]\FACT2_1.0
+   [2]\FOR I_1:N DOTHRU %3
+   [3]\FACT2_FACT2*I
+   [4]\$
+
+\FACT2(12)
+4.790016E+08
+.end
+
+.sec(Nesting and Recursion,recursion)
+
+Since any statement that may be submitted for
+direct execution is also legal as a step of a function,
+it follows that functions may call other functions
+in the manner already considered.
+This is known as !<nested> @/<function call,nesting/of>ing,
+and it may be carried on to any reasonable depth.
+
+In PPL, it is perfectly legal
+for a function to call itself.  This technique
+is known as !<recursion> and is 
+.x recursion
+useful in many applications.
+In writing recursive functions, it should
+be borne in mind that @@<local variable,behavior in recursive call>s
+belonging to nested calls of the
+same function are completely independent.
+Locals within the called function are
+not visible to the caller or vice versa.
+
+Recursion is used extensively in many higher-level computer
+applications (for example, the syntax recognizer in PPL is
+recursive); however, a simple example should suffice to demonstrate
+the general principle.  We shall define a recursive
+<<factorial> function in terms of itself, as follows:
+
+.examp
+\$<<RFACT>(N)
+   [1]\IF N<1 THEN RFACT_1.0 ELSE RFACT_N*RFACT(N-1)
+   [2]\$
+
+\RFACT(19)
+1.216451E+17
+.end
+
+This function computes the factorial by using the
+knowledge that
+
+.begin nofill tabs 9
+
+\!<n>! = !<n>*(!<n>-1)!
+.end
+
+where 0! is defined as one.  Thus, in computing 3RFACT(19)1,
+the ~RFACT~ function is actually called (recursively) 19 times.
+Each successive call is nested within a single expression
+in statement [1] of the caller.  When the calls reach a depth
+of 19, the value of the dummy argument ~N~ at the deepest
+level is zero, and thus 1.0 is returned as the value of the
+call at this level.  It should be emphasized once again
+that the values of the procedure identifier ~RFACT~
+and of the parameter ~N~ are completely independent
+at each level.
+
+A final note: if a parameterless procedure
+.xx parameterless procedure,recursive call,of
+calls itself recursively, the call must be made by appending
+an empty pair of parentheses to the name.
+Otherwise, PPL will assume that what is
+wanted is the current value of the procedure
+identifier rather than the value obtained by calling the
+function again.
+
+.sec(Labels,labels)
+
+PPL has a provision for <<label>ling statements with
+names as well as numbers.  A !<label> is an
+@@<identifier,label> immediately followed by a @@<colon,delimiting label> at the
+beginning of a stored statement (i.e. a step of
+a user-defined function).
+Defining a label in this way causes the identifier
+to be declared a local variable and initialized with
+the number of the containing statement.
+For example, the following function will
+operate identically to the one defined in {"Section!" gotos}:
+
+.examp
+\$<<EUCLID>(M,N); R
+   [1]\COMPUTE.REMAINDER:  R _ M-N*IDIV(M,N)
+   [2]\IF R=0 THEN RETURN N
+   [3]\M_N; N_R; GOTO COMPUTE.REMAINDER
+   [4]\$
+.end
+
+Labels are particularly handy when you are composing a
+function at the terminal and you need to refer (in a ~GOTO~ or
+~FOR~ statement) to a statement later in the function which you
+haven't defined yet.
+
+.sec(Comments,comments)
+.x comment
+
+In a program that is at all complicated,
+it is a good idea to add explanitory material in the
+form of !<comments>.  Liberal use
+of comments aids programming in several ways,
+not the least of which is making the operation
+of the program clearer to the user and to other programmers.
+In PPL, a comment may be appended to any statement
+by preceding it with a string of three @@<period,denoting comment>s.
+When PPL sees three periods it considers the
+rest of the line to be a comment and
+ignores it.  However, if the statement
+is stored as part of a user-defined function,
+the comment remains in the text and is printed
+out when the function is displayed using
+the question-mark command (introduced in {"Section!" textedit}).
+The user is warned that the first period should not
+be adjacent to a digit;  otherwise, the period
+may be construed as a decimal point and the comment
+as part of the statement.  A separation of a single
+space or Tab is sufficient.
+
+.sec(Continuation,continuation)
+.xx statement,continuation,of
+
+Where necessary, a statement may be continued on
+more than one line.  To continue to a new line, the
+<<percent-sign> character (%) is used at the end of the line.*<In PDP-10 PPL
+versions prior to 53, line continuation is accomplished by
+pressing the Line-Feed (LF) key.>
+PPL spaces down one line,
+moves eight spaces from the left margin, but
+does not print a statement number.  There are only two
+restrictions on the use of continuation lines:
+first, a single !<lexeme> (@@<number,lexeme>, @@<identifier,lexeme>, multi-character
+.x lexeme
+@@<operator,lexeme>, etc.) may not be split between lines.
+Second, the entire statement may not be more than
+500 characters in length.
+.x length of statement
+Continuing a statement
+within a ~STRING~ causes a Return and a Line-Feed
+.x Return key
+.xx STRING,continuation,within
+(or the single Newline character in the PDP-11 version)
+to be included within the ~STRING~:
+
+.examp tabs 9,35
+\"THIS IS A%\7Percent sign for continuation.3
+\SPLIT STRING"
+THIS IS A
+SPLIT STRING
+.end
+
+For convenience, there is a variable in PPL called ~<<NEWLINE>~,
+predefined to contain a ~STRING~ consisting of the special
+characters above in precisely this manner (i.e. as if the
+statement
+
+.examp
+\NEWLINE _ "%
+\"
+.end
+
+had been executed).  This is useful as an argument to the
+~PRINT~ function when it is desired to advance to the next line.
+.x line advance

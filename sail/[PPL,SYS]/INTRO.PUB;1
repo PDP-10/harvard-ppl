@@ -1,0 +1,187 @@
+.chap(Introduction,intro)
+.sec(Abstract,abstract)
+
+PPL (the Polymorphic Programming Language) is a conversational, extensible language
+oriented toward personal rather than institutional uses
+of computers. For example, in PPL one can
+write a program in twenty minutes
+to differentiate formulas, but a PPL program to do large reactor
+core calculations or to compute payrolls,
+although possible, would be quite impractical.
+PPL has been designed to promote rapid
+composition, modification and debugging of programs over a
+wide variety of application areas.  To achieve this property,
+the mechanical efficiency of the language has been consciously
+sacrificed, in certain cases, in favor of flexibility and generality.
+
+PPL is a typeless
+conversational language similar to @@<Iverson,K.E.>'s <<APL>
+in which the Iversonian mechanics of arrays have been subtracted
+out, and to which powerful data definition
+and operator definition facilities have been added.
+The syntax has been augmented to include
+convenient forms for performing iterations and conditional
+operations, and to allow the use of functions taking
+any number of arguments.
+
+PPL's conversational mechanics include the abilities to
+trace running programs, to interrupt running programs, to set
+and remove breakpoints, to write programs that converse with users, and to
+edit the text of programs.  Running time is proportional to
+the demand for computation, and, in particular, trivial requests
+are satisfied rapidly.
+
+Input/output facilities are included for saving and
+restoring the text of programs, for storing and retrieving
+entire working environments in partial stages of
+execution, and for reading and writing data in
+any of several modes.
+
+Using the data definition facilities,
+it is literally possible within an hour
+to write programs that perform useful
+operations on data such as matrices, complex numbers, vectors, formulas,
+rational numbers or polynomials, or on strings, lists or trees.
+Defined operations may be associated with unary and binary
+operators of the user's own choosing, including redefining the meaning of operators given in the
+initial state of the language. 
+Data and operator definitions allow the programmer
+to assign convenient notations for writing
+programs in these and other problem areas.
+
+.sec(Scope,scope)
+
+This document is intended primarily as a reference manual
+for PPL, and not as an introductory text
+in computer programming.  Although the explanations
+attempt to be as complete as possible, they do not
+dwell on the simpler or more basic points.
+A companion document,
+!<An Introduction to PPL Programming>, by T. A. @@<Standish,Thomas A.>,
+deals with the basic
+concepts of computer programming in a more
+detailed and systematic manner, and is recommended
+for beginners.  On the other hand,
+the !<PPL User's Manual> alone should serve the
+needs of those users who have had at least a minimum
+of previous experience in computing.
+
+.sec(Organization,organization)
+
+To date, PPL has been implemented on two different computers:
+the <<PDP-10> and the <<PDP-11>.  Furthermore, versions of PPL-10
+have been implemented to run under both the <<DECsystem-10>
+and BBN <<Tenex> operating systems (the PDP-11 version runs
+under the <<Unix> operating system).
+.see operating system,|DECsystem-10, Tenex, Unix|
+
+Every attempt has been made in the course of PPL development
+to maintain complete @@<compatibility,between PPL versions> between all versions of PPL.
+The only intentional differences lie in the following areas:
+
+(1) Those due to the different memory word sizes of
+the PDP-10 and PDP-11, affecting the limits of magnitude and
+precision in numbers; and
+
+(2) Those resulting from differences in operating environments
+provided by the respective operating systems, affecting the protocols
+used to log in and log out, the control character conventions used
+during text typein and editing, and the input/output facilities
+available to the programmer.
+
+Except where specifically noted, descriptions in this manual
+are applicable to all versions of PPL.  Machine dependencies
+will be noted by referring specifically to <<PPL-10> and <<PPL-11>,
+and operating system dependencies by referring to the
+DECsystem-10, Tenex, and Unix versions of PPL.
+
+This manual reflects version 53 of PPL-10*<At the time
+this edition of the manual was prepared, PPL-10 version 53
+had not yet been released.  Earlier versions do not contain
+the advanced text editing capabilities described in
+{"Section" charedit}, but rather contain a somewhat more limited
+character-by-character editor described in {"Appendix" apsup10}.>
+and version 7 of PPL-11.
+Changes made to PPL in later releases will be documented through
+revised editions of the manual and through separate update sheets.
+
+.sec(Acknowledgements,ack)
+
+PPL has benefited from the contributions of many individuals.
+The language was initially conceived by T.A. @@<Standish,Thomas A.>, at the
+National University of Mexico in the summer of 1968.{ref 3}
+The design evolved over the next year into the version of PPL
+presented at a Working Conference on Extensible Languages
+held at Carnegie-Mellon University on 2-4 December 1968 and
+at the Extensible Language Symposium held in Boston on
+13 May 1969.{ref(|4,5|)}
+
+Implementation of PPL-10 was begun at Harvard in July 1970 by T.A. Standish
+and E.A. @@<Taft,Edward A.>, and after proceeding for six months, resulted
+in the first working version of PPL.  Major revisions
+were undertaken in the summers of 1971 and 1974, during which
+time considerable improvements were made in syntax
+and program control.
+
+The PDP-11 version of PPL was designed and implemented
+at Harvard during 1973-74 by C.J. @@<Prenner,Charles J.> and A.Z. @@<Spector,Alfred Z.>.
+
+Other individuals whose contributions to PPL have been exceedingly
+helpful include the following:
+
+.begin nofill indent 8 tabs 35
+
+%%<William H./Bossert>\%%<Wendy D./Mela>
+%%<Robert B./Greenberg>\%%<Eric S./Roberts>
+%%<Jeffrey C./Herrmann>\%%<Richard M./Stallman>
+%%<Louis/Lasher>\%%<Judy A./Townley>
+%%<Randy H./Lundberg>\%%<Joel/Weisberg>
+%%<George H./Mealy>
+.end
+
+.begin turn off "-"
+Grateful acknowledgement is also made to the United States Air Force
+for support of the initial implementation effort.  PPL-10 was supported
+under contract F19628-68-C-0101 by Harvard University to the
+Directorate of Systems Design and Development, HQ Electronic
+Systems Division, Air Force System Command, L.G. Hanscom
+Field, Bedford, Massachusetts 01730.  An earlier edition
+of this manual was reprinted, in the style required by the
+Air Force, as Air Force Technical Report ESD-TR-70-441.
+PPL-11 was supported in part by grants from the Harvard Faculty
+of Arts and Sciences and from the Advanced Research Projects Agency.
+.end
+
+This edition of the !<PPL User's Manual> was prepared on-line with the
+aid of facilities provided by the Xerox Palo Alto Research Center.
+
+Inquiries and communications concerning the PPL system and
+documentation may be directed to any of the principal
+implementers or authors at the following addresses:
+
+.begin nofill indent 8 group
+
+%%<Louis/Lasher>
+Center for Research in Computing Technology
+Aiken Computation Laboratory
+Harvard University
+Cambridge, Massachusetts  02138
+
+.apart group
+%%<Alfred Z./Spector>
+Computer Science Department
+Stanford University
+Stanford, California  94305
+
+.apart group
+%%<Thomas A./Standish>
+Department of Information and Computer Science
+University of California at Irvine
+Irvine, California  92717
+
+.apart group
+%%<Edward A./Taft>
+Xerox Palo Alto Research Center
+3333 Coyote Hill Road
+Palo Alto, California  94304
+.end
