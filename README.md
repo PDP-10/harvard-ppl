@@ -12,6 +12,8 @@ and why the files seem tailored for TENEX:
 > Harvard with Tom Cheatham.  And given that MAXC ran a version of
 > TENEX, it all makes sense.
 
+For completeness, a copy of the Unix version is also included.
+
 According to Thomas Standish,
 
 > PPL was written on a DEC PDP-10 at Harvard (1969-1971) by Standish
